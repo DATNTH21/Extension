@@ -1,0 +1,10 @@
+{
+  "devDependencies": {
+    "@types/vscode": "^1.93.0",
+    "vscode": "^1.1.37"
+  },
+  "dependencies": {
+    "chatgpt": "^5.2.5",
+    "node-fetch": "^3.3.2"
+  }
+}
