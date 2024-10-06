@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; script-src 'self' 'nonce-<%= nonce %>';">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="${styleResetUri}" rel="stylesheet">
+    <link href="${styleVSCodeUri}" rel="stylesheet">
+    <link href="${styleMainUri}" rel="stylesheet">
+    <title>Unit Test Generator</title>
+</head>
+<body>
+    <form action="javascript:void(0);" id="genForm">
+        <fieldset>
+            <legend>Generate Unit Tests</legend>
+            <label for="apiToken">Gemini API Token:</label>
+            <input id="apiToken" type="password" name="apiToken" required />
+        </fieldset>
+        <fieldset>
+            <label for="proj-testing-framework">Project's Testing Framework:</label>
+            <input id="proj-testing-framework" type="text" name="projTestingFramework" required />
+        </fieldset>
+        <fieldset>
+            <label for="acceptanceCriteria">Acceptance Criteria:</label>
+            <textarea id="acceptanceCriteria" name="acceptanceCriteria" rows="10" required></textarea>
+        </fieldset>
+        <button type="submit" id="submitButton">Generate Tests</button>
+    </form>
+    
+    <button type="button" id="validate">Validate</button>
+    <div style="font-size:0.8em; margin-top: 5px;">Validate staged Unit test code against Acceptance criteria</div>
+    
+    <div id="status"></div>
+    <pre id="code"></pre>
+    
+    <script nonce="<%= nonce %>" src="${scriptUri}"></script>
+</body>
+</html>

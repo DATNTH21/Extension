@@ -1,0 +1,47 @@
+{
+  "name": "Extension",
+  "version": "0.0.1",
+  "lockfileVersion": 3,
+  "requires": true,
+  "activationEvents": [
+    "onCommand:gemini.generateUnitTest"
+  ],
+  "description": "A VS Code extension to generate unit tests using the Gemini API.",
+  "displayName": "Gemini Test Generator",
+  "main": "./dist/extension.js",
+  "packages": {},
+  "contributes": {
+    "commands": [
+      {
+        "command": "gemini.generateUnitTest",
+        "title": "Generate Unit Test"
+      },
+      {
+        "command": "gemini.validateTests",
+        "title": "Validate Tests"
+      },
+      {
+        "command": "gemini.deleteData",
+        "title": "Delete Data"
+      }
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^16.18.3",
+    "@types/vscode": "^1.70.0",
+    "typescript": "^4.8.4",
+    "vscode": "^1.1.37"
+  },
+  "engines": {
+    "vscode": "^1.70.0"
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "vscode:prepublish": "tsc -p ./"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "axios": "^1.7.7",
+    "dotenv": "^16.4.5"
+  }
+}
