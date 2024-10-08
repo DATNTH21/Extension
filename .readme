@@ -1,0 +1,9 @@
+Code Window:
+npm run compile
+F5
+Debug Window:
+Ctrl + Shift + P
+> WeTest: Generate Unit Test For Folder
+> WeTest: Generate Unit Test For File
+> WeTest: Generate Unit Test For Selected Code
+> WeTest: Reset API

@@ -13,16 +13,20 @@
   "contributes": {
     "commands": [
       {
-        "command": "gemini.generateUnitTest",
-        "title": "Generate Unit Test"
+        "command": "gemini.generateUnitTestFolder",
+        "title": "WeTest: Generate Unit Test For Folder"
       },
       {
-        "command": "gemini.validateTests",
-        "title": "Validate Tests"
+        "command": "gemini.generateUnitTestFile",
+        "title": "WeTest: Generate Unit Test For File"
       },
       {
-        "command": "gemini.deleteData",
-        "title": "Delete Data"
+        "command": "gemini.generateUnitTestSelected",
+        "title": "WeTest: Generate Unit Test For Selected Code"
+      },
+      {
+        "command": "gemini.resetAPI",
+        "title": "WeTest: Reset API"
       }
     ]
   },
