@@ -48,10 +48,10 @@ export function activate(context: vscode.ExtensionContext) {
 
                             // Create a new test file name
                             const testFileName = `${path.basename(filePath, path.extname(filePath))}_test.${extension}`; // Change extension as needed
-
-                            // Create the test file with the generated unit tests
-                            await createTestFile(testFileName, unitTests);
-                            vscode.window.showInformationMessage(`Unit tests generated and saved to ${testFileName}`);
+                            const folderPath = path.dirname(uri[0].fsPath); 
+                            const testFilePath = path.join(folderPath,testFileName);
+                            await fs.writeFile(testFilePath, unitTests, { encoding: 'utf8' });
+                            vscode.window.showInformationMessage(`Unit tests generated and saved to ${testFilePath}`);
                         } else {
                             vscode.window.showInformationMessage('No appropriate framework available for this code.');
                         }
@@ -137,7 +137,6 @@ export function activate(context: vscode.ExtensionContext) {
     // Registering the command to generate unit tests for selected code
     const genUnitTestSelectedCommand = vscode.commands.registerCommand('generateUnitTestSelected', async () => {
         let selectedLLM = context.workspaceState.get("selectedLLM");
-
         if (!selectedLLM) {
             selectedLLM = await showSelectionList(['chatgpt', 'gemini']);
         }
@@ -164,9 +163,26 @@ export function activate(context: vscode.ExtensionContext) {
                             const testFileName = String(await generateFileName(selectedText, String(apiKey)));
 
                             // Create the test file with the generated unit tests
-                            await createTestFileForSelectedCode(testFileName, unitTests);
                             vscode.window.showInformationMessage(`Unit tests generated and saved to ${testFileName}`);
-                        } else {
+                            
+                            // Get the full path of the currently opened file
+                            const filePath = editor.document.uri.fsPath;
+                            const fileName = testFileName.replace(/\s+/g, '');
+                            // Use path.dirname to get the directory path
+                            const directoryPath = path.dirname(filePath);
+                            // Create the full path for the test file
+                            const testFilePath = vscode.Uri.file(path.join(directoryPath, fileName));
+                            try {
+                                await fs.writeFile(testFilePath.fsPath, unitTests, { encoding: 'utf8' });
+                                await vscode.workspace.fs.writeFile(testFilePath, Buffer.from(unitTests, 'utf8'));
+                                vscode.window.showInformationMessage(`Test file created: ${fileName}`);
+                            }catch (err) {
+                            const errorMessage = (err as Error).message;
+                            console.error(`Error creating test file: ${errorMessage}`); // Log the error to the console
+                            vscode.window.showErrorMessage(`Failed to create test file: ${errorMessage}`);
+                        }
+                    }
+                         else {
                             vscode.window.showInformationMessage('No appropriate framework available for this code.');
                         }
                     } else {
@@ -229,35 +245,6 @@ async function getApiKey(context: vscode.ExtensionContext, selectedLLM: string) 
     return apiKey;
 }
 
-/**
- * Create a test file with the given name and content.
- * 
- * @param testFileName - The name of the test file.
- * @param unitTests - The content to write to the test file.
- */
-async function createTestFile(testFileName: string, unitTests: string) {
-    const currentWorkspaceFolders = vscode.workspace.workspaceFolders;
-    if (currentWorkspaceFolders) {
-        const folderPath = currentWorkspaceFolders[0].uri.fsPath; // Get the first workspace folder path
-        const testFilePath = path.join(folderPath, testFileName);
-        await fs.writeFile(testFilePath, unitTests, { encoding: 'utf8' });
-    }
-}
-
-/**
- * Create a test file for the selected code with the given name and content.
- * 
- * @param testFileName - The name of the test file.
- * @param unitTests - The content to write to the test file.
- */
-async function createTestFileForSelectedCode(testFileName: string, unitTests: string) {
-    const editor = vscode.window.activeTextEditor;
-    if (editor) {
-        const folderPath = path.dirname(editor.document.fileName); // Get the directory of the current file
-        const testFilePath = path.join(folderPath, testFileName);
-        await fs.writeFile(testFilePath, unitTests, { encoding: 'utf8' });
-    }
-}
 
 // This method is called when your extension is deactivated
 export function deactivate() {}
