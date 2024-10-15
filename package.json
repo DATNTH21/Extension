@@ -13,19 +13,19 @@
   "contributes": {
     "commands": [
       {
-        "command": "gemini.generateUnitTestFolder",
+        "command": "generateUnitTestFolder",
         "title": "WeTest: Generate Unit Test For Folder"
       },
       {
-        "command": "gemini.generateUnitTestFile",
+        "command": "generateUnitTestFile",
         "title": "WeTest: Generate Unit Test For File"
       },
       {
-        "command": "gemini.generateUnitTestSelected",
+        "command": "generateUnitTestSelected",
         "title": "WeTest: Generate Unit Test For Selected Code"
       },
       {
-        "command": "gemini.resetAPI",
+        "command": "resetAPI",
         "title": "WeTest: Reset API"
       }
     ]
@@ -46,6 +46,7 @@
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
     "axios": "^1.7.7",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "openai": "^4.67.3"
   }
 }

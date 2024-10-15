@@ -1,191 +1,195 @@
 import * as vscode from 'vscode';
-import { generateUnitTests, getRecommendedTestingFrameworks, getTestingFrameworks, generateFileName} from './geminiService';
+import { initializeLLM, generateUnitTests, getRecommendedTestingFrameworks, getTestingFrameworks, generateFileName } from './service';
 import * as fs from 'fs/promises';
 import path from 'path';
 
 export function activate(context: vscode.ExtensionContext) {
-    // Registering the command to generate unit tests
-    const genUnitTestFileCommand = vscode.commands.registerCommand('gemini.generateUnitTestFile', async () => {
+    initializeLLM(context);
+    // Registering the command to generate unit tests for a file
+    const genUnitTestFileCommand = vscode.commands.registerCommand('generateUnitTestFile', async () => {
         const uri = await vscode.window.showOpenDialog({
             canSelectMany: false,
             filters: {
                 'All Files': ['*'],
             },
         });
-        
+
         if (!uri || uri.length === 0) {
             vscode.window.showErrorMessage("No file selected.");
             return;
         }
 
-        let apiKey = context.workspaceState.get("geminiApiKey");
-        if (!apiKey) {
-            apiKey = await vscode.window.showInputBox({
-                prompt: 'Enter your Gemini API key:',
-                placeHolder: 'API Key'
-            });
+        let selectedLLM = context.workspaceState.get("selectedLLM");
+
+        if (!selectedLLM) {
+            selectedLLM = await showSelectionList(['chatgpt', 'gemini']);
         }
 
-        if (apiKey) {
-            context.workspaceState.update("geminiApiKey", apiKey);
-            const fileUri = uri[0];
-            const filePath = fileUri.fsPath;
+        if (selectedLLM) {
+            context.workspaceState.update("selectedLLM", selectedLLM);
+            const apiKey = await getApiKey(context, String(selectedLLM));
+            if (apiKey) {
+                const fileUri = uri[0];
+                const filePath = fileUri.fsPath;
 
-            try {
-                // Read the file content
-                const content = await fs.readFile(filePath, { encoding: 'utf8' });
-                const extension = String(filePath.split('.').pop());
-                const frameworks: string[] = await getTestingFrameworks(extension, String(apiKey));
-                if (frameworks.length > 0) { // Check if the array is not empty
-                    const selectedFramework = await showSelectionList(frameworks);
+                try {
+                    // Read the file content
+                    const content = await fs.readFile(filePath, { encoding: 'utf8' });
+                    const extension = path.extname(filePath).slice(1); // Get the extension without the dot
+                    const frameworks: string[] = await getTestingFrameworks(extension, String(apiKey));
+                    
+                    if (frameworks.length > 0) { // Check if the array is not empty
+                        const selectedFramework = await showSelectionList(frameworks);
+                        if (selectedFramework !== 'none') {
+                            vscode.window.showInformationMessage(`You selected: ${selectedFramework}`);
 
-                    if (selectedFramework != 'none') {
-                        vscode.window.showInformationMessage(`You selected: ${selectedFramework}`);
-                        
-                        // Generate unit tests using the selected framework
-                        const unitTests = String(await generateUnitTests(String(selectedFramework), content, String(apiKey)));
+                            // Generate unit tests using the selected framework
+                            const unitTests = String(await generateUnitTests(String(selectedFramework), content, String(apiKey)));
 
-                        // Create a new test file name
-                        const testFileName = `${filePath.replace(/\.[^/.]+$/, "")}_test.${extension}`; // Change extension as needed
-                        
-                        // Create the test file with the generated unit tests
-                        createTestFile(testFileName, unitTests);
+                            // Create a new test file name
+                            const testFileName = `${path.basename(filePath, path.extname(filePath))}_test.${extension}`; // Change extension as needed
 
-                        vscode.window.showInformationMessage(`Unit tests generated and saved to ${testFileName}`);
+                            // Create the test file with the generated unit tests
+                            await createTestFile(testFileName, unitTests);
+                            vscode.window.showInformationMessage(`Unit tests generated and saved to ${testFileName}`);
+                        } else {
+                            vscode.window.showInformationMessage('No appropriate framework available for this code.');
+                        }
                     } else {
-                        vscode.window.showInformationMessage('No appropriate framework available for this code.');
+                        vscode.window.showInformationMessage('No frameworks available for the selected extension.');
                     }
-                } else {
-                    vscode.window.showInformationMessage('No frameworks available for the selected extension.');
+
+                } catch (err) {
+                    const errorMessage = err instanceof Error ? err.message : String(err);
+                    vscode.window.showErrorMessage(`Failed to generate unit tests: ${errorMessage}`);
                 }
-                
-            } catch (err) {
-                const errorMessage = err instanceof Error ? err.message : String(err);
-                vscode.window.showErrorMessage(`Failed to generate unit tests: ${errorMessage}`);
             }
         }
     });
-    const genUnitTestFolderCommand = vscode.commands.registerCommand('gemini.generateUnitTestFolder', async () => {
+
+    // Registering the command to generate unit tests for a folder
+    const genUnitTestFolderCommand = vscode.commands.registerCommand('generateUnitTestFolder', async () => {
         const folderUri = await vscode.window.showOpenDialog({
             canSelectMany: false,
             openLabel: 'Select a folder',
             canSelectFolders: true,
         });
-        
+
         if (!folderUri || folderUri.length === 0) {
             vscode.window.showErrorMessage("No folder selected.");
             return;
         }
-    
-        let apiKey = context.workspaceState.get("geminiApiKey");
-        if (!apiKey) {
-            apiKey = await vscode.window.showInputBox({
-                prompt: 'Enter your Gemini API key:',
-                placeHolder: 'API Key'
-            });
+
+        let selectedLLM = context.workspaceState.get("selectedLLM");
+        if (!selectedLLM) {
+            selectedLLM = await showSelectionList(['chatgpt', 'gemini']);
         }
-    
-        if (apiKey) {
-            context.workspaceState.update("geminiApiKey", apiKey);
-            const folderPath = folderUri[0].fsPath;
-            const folderName = path.basename(folderPath); // Get the name of the folder
-            const parentFolderPath = path.dirname(folderPath); // Get the parent folder path
-            try {
-                const files = await fs.readdir(folderPath);
-                const testFolderPath = `${parentFolderPath}/${folderName}_test`; // Create a test folder path
-    
-                // Create the test folder if it doesn't exist
-                await fs.mkdir(testFolderPath, { recursive: true });
-    
-                for (const file of files) {
-                    const filePath = path.join(folderPath, file);
-                    const extension = String(file.split('.').pop());
-    
-                    // Only process files (skip directories)
-                    const stat = await fs.stat(filePath);
-                    if (stat.isFile()) {
-                        // Read the file content
-                        const content = await fs.readFile(filePath, { encoding: 'utf8' });
-                        const framework = await getRecommendedTestingFrameworks(extension, String(apiKey));
 
-                        if (framework !== 'none') {
-                            // Generate unit tests using the selected framework
-                            const unitTests = String(await generateUnitTests(String(framework), content, String(apiKey)));
+        if (selectedLLM) {
+            context.workspaceState.update("selectedLLM", selectedLLM);
+            const apiKey = await getApiKey(context, String(selectedLLM));
+            if (apiKey) {
+                const folderPath = folderUri[0].fsPath;
+                const folderName = path.basename(folderPath); // Get the name of the folder
+                const parentFolderPath = path.dirname(folderPath); // Get the parent folder path
+                try {
+                    const files = await fs.readdir(folderPath);
+                    const testFolderPath = path.join(parentFolderPath, `${folderName}_test`); // Create a test folder path
 
-                            // Create a new test file name
-                            const testFileName = `${file.replace(/\.[^/.]+$/, "")}_test.${extension}`; // Change extension as needed
-                            const testFilePath = path.join(testFolderPath, testFileName);
-                            // Create the test file with the generated unit tests
-                            await fs.writeFile(testFilePath, unitTests, { encoding: 'utf8' });
-                            vscode.window.showInformationMessage(`Unit tests generated and saved to ${testFilePath}`);
-                        } else {
-                            vscode.window.showInformationMessage(`No appropriate framework available for ${file}.`);
+                    // Create the test folder if it doesn't exist
+                    await fs.mkdir(testFolderPath, { recursive: true });
+
+                    for (const file of files) {
+                        const filePath = path.join(folderPath, file);
+                        const extension = path.extname(file).slice(1); // Get the extension without the dot
+
+                        // Only process files (skip directories)
+                        const stat = await fs.stat(filePath);
+                        if (stat.isFile()) {
+                            // Read the file content
+                            const content = await fs.readFile(filePath, { encoding: 'utf8' });
+                            const framework = await getRecommendedTestingFrameworks(extension, String(apiKey));
+
+                            if (framework !== 'none') {
+                                // Generate unit tests using the selected framework
+                                const unitTests = String(await generateUnitTests(framework, content, String(apiKey)));
+
+                                // Create a new test file name
+                                const testFileName = `${path.basename(file, path.extname(file))}_test.${extension}`; // Change extension as needed
+                                const testFilePath = path.join(testFolderPath, testFileName);
+                                // Create the test file with the generated unit tests
+                                await fs.writeFile(testFilePath, unitTests, { encoding: 'utf8' });
+                                vscode.window.showInformationMessage(`Unit tests generated and saved to ${testFilePath}`);
+                            } else {
+                                vscode.window.showInformationMessage(`No appropriate framework available for ${file}.`);
+                            }
+
                         }
-                        
                     }
+                } catch (err) {
+                    const errorMessage = err instanceof Error ? err.message : String(err);
+                    vscode.window.showErrorMessage(`Failed to generate unit tests: ${errorMessage}`);
                 }
-                
-            } catch (err) {
-                const errorMessage = err instanceof Error ? err.message : String(err);
-                vscode.window.showErrorMessage(`Failed to generate unit tests : ${errorMessage}`);
             }
         }
     });
-    const genUnitTestSelectedCommand = vscode.commands.registerCommand('gemini.generateUnitTestSelected', async () => {
-        let apiKey = context.workspaceState.get("geminiApiKey");
-        if (!apiKey) {
-            apiKey = await vscode.window.showInputBox({
-                prompt: 'Enter your Gemini API key:',
-                placeHolder: 'API Key'
-            });
+
+    // Registering the command to generate unit tests for selected code
+    const genUnitTestSelectedCommand = vscode.commands.registerCommand('generateUnitTestSelected', async () => {
+        let selectedLLM = context.workspaceState.get("selectedLLM");
+
+        if (!selectedLLM) {
+            selectedLLM = await showSelectionList(['chatgpt', 'gemini']);
         }
+        if (selectedLLM) {
+            context.workspaceState.update("selectedLLM", selectedLLM);
+            const apiKey = await getApiKey(context, String(selectedLLM));
+            if (apiKey) {
+                const editor = vscode.window.activeTextEditor;
+                if (editor) {
+                    const selection = editor.selection;
+                    const selectedText = editor.document.getText(selection);
+                    if (selectedText) {
+                        // Get the file extension
+                        const fileExtension = path.extname(editor.document.fileName).slice(1); // Get the extension without the dot
+                        const frameworks: string[] = await getTestingFrameworks(fileExtension, String(apiKey));
+                        const selectedFramework = await showSelectionList(frameworks);
 
-        if (apiKey) {
-            context.workspaceState.update("geminiApiKey", apiKey);
-            const editor = vscode.window.activeTextEditor;
-            if (editor) {
-                const selection = editor.selection;
-                const selectedText = editor.document.getText(selection);
-                if (selectedText) {
-                    // Get the file extension
-                    const fileExtension = editor.document.fileName.split('.').pop();
-                    const frameworks: string[] = await getTestingFrameworks(String(fileExtension), String(apiKey));
-                    const selectedFramework = await showSelectionList(frameworks);
+                        if (selectedFramework !== 'none') {
+                            vscode.window.showInformationMessage(`You selected: ${selectedFramework}`);
 
-                    if (selectedFramework != 'none') {
-                        vscode.window.showInformationMessage(`You selected: ${selectedFramework}`);
-                        
-                        // Generate unit tests using the selected framework
-                        const unitTests = String(await generateUnitTests(String(selectedFramework), selectedText, String(apiKey)));
-                        // Create a new test file name
-                        const testFileName =  String(await generateFileName(String(selectedText), String(apiKey)));
-                        
-                        // Create the test file with the generated unit tests
-                        createTestFileForSelectedCode(testFileName, unitTests);
+                            // Generate unit tests using the selected framework
+                            const unitTests = String(await generateUnitTests(String(selectedFramework), selectedText, String(apiKey)));
+                            // Create a new test file name
+                            const testFileName = String(await generateFileName(selectedText, String(apiKey)));
 
-                        vscode.window.showInformationMessage(`Unit tests generated and saved to ${testFileName}`);
+                            // Create the test file with the generated unit tests
+                            await createTestFileForSelectedCode(testFileName, unitTests);
+                            vscode.window.showInformationMessage(`Unit tests generated and saved to ${testFileName}`);
+                        } else {
+                            vscode.window.showInformationMessage('No appropriate framework available for this code.');
+                        }
                     } else {
-                        vscode.window.showInformationMessage('No appropriate framework available for this code.');
+                        vscode.window.showInformationMessage('No code selected for unit test generation.');
                     }
                 } else {
-                    vscode.window.showInformationMessage('No code selected for unit test generation.');
+                    vscode.window.showInformationMessage('No active editor.');
                 }
-            } else {
-                vscode.window.showInformationMessage('No active editor.');
             }
-                
         }
     });
-    
-    const resetAPICommand = vscode.commands.registerCommand('gemini.resetAPI', async () => {
+
+    // Command to reset API key
+    const resetAPICommand = vscode.commands.registerCommand('resetAPI', async () => {
+        let selectedLLM = await showSelectionList(['chatgpt', 'gemini']);
         let apiKey = await vscode.window.showInputBox({
             prompt: 'Enter your Gemini API key:',
             placeHolder: 'API Key'
         });
-        context.workspaceState.update("geminiApiKey", apiKey);
 
+        context.workspaceState.update(selectedLLM+ "ApiKey", apiKey);
     });
-    
+
     context.subscriptions.push(genUnitTestFolderCommand, genUnitTestFileCommand, genUnitTestSelectedCommand, resetAPICommand);
 }
 
@@ -204,53 +208,56 @@ async function showSelectionList(items: string[]): Promise<string | undefined> {
     return selection; // Return the selected item or undefined if canceled
 }
 
-
-
 /**
- * Creates a test file with the provided name and content.
+ * Gets the API key for the selected LLM, prompting the user if necessary.
  * 
- * @param fileName - The name of the file to create.
- * @param content - The content to write to the file.
+ * @param context - The VSCode extension context.
+ * @param selectedLLM - The selected LLM identifier.
+ * @returns The API key or undefined if the user cancels.
  */
-async function createTestFileForSelectedCode(fileName: string, content: string) {
-    const editor = vscode.window.activeTextEditor;
-
-    if (editor) {
-        // Get the full path of the currently opened file
-        const filePath = editor.document.uri.fsPath;
-        fileName = fileName.replace(/\s+/g, '');
-        // Use path.dirname to get the directory path
-        const directoryPath = path.dirname(filePath);
-        // Create the full path for the test file
-        const testFilePath = vscode.Uri.file(path.join(directoryPath, fileName));
-        try {
-            await fs.writeFile(testFilePath.fsPath, content, { encoding: 'utf8' });
-            await vscode.workspace.fs.writeFile(testFilePath, Buffer.from(content, 'utf8'));
-            vscode.window.showInformationMessage(`Test file created: ${fileName}`);
-        } catch (err) {
-            const errorMessage = (err as Error).message;
-            console.error(`Error creating test file: ${errorMessage}`); // Log the error to the console
-            vscode.window.showErrorMessage(`Failed to create test file: ${errorMessage}`);
+async function getApiKey(context: vscode.ExtensionContext, selectedLLM: string) {
+    let apiKey = context.workspaceState.get(`${selectedLLM}ApiKey`);
+    if (!apiKey) {
+        apiKey = await vscode.window.showInputBox({
+            prompt: 'Enter your API key:',
+            placeHolder: 'API Key',
+        });
+        if (apiKey) {
+            context.workspaceState.update(`${selectedLLM}ApiKey`, apiKey);
         }
-    } else {
-        vscode.window.showErrorMessage('No active editor detected. Please open a file first.');
     }
+    return apiKey;
 }
+
 /**
- * Creates a test file with the provided name and content.
+ * Create a test file with the given name and content.
  * 
- * @param fileName - The name of the file to create.
- * @param content - The content to write to the file.
+ * @param testFileName - The name of the test file.
+ * @param unitTests - The content to write to the test file.
  */
-async function createTestFile(fileName: string, content: string) {
-    try {
-        await fs.writeFile(fileName, content); // Use the full path for writing the file
-        const document = await vscode.workspace.openTextDocument(fileName);
-        vscode.window.showTextDocument(document);
-    } catch (err) {
-        const errorMessage = (err as Error).message;
-        vscode.window.showErrorMessage(`Failed to create test file: ${errorMessage}`);
+async function createTestFile(testFileName: string, unitTests: string) {
+    const currentWorkspaceFolders = vscode.workspace.workspaceFolders;
+    if (currentWorkspaceFolders) {
+        const folderPath = currentWorkspaceFolders[0].uri.fsPath; // Get the first workspace folder path
+        const testFilePath = path.join(folderPath, testFileName);
+        await fs.writeFile(testFilePath, unitTests, { encoding: 'utf8' });
     }
 }
 
+/**
+ * Create a test file for the selected code with the given name and content.
+ * 
+ * @param testFileName - The name of the test file.
+ * @param unitTests - The content to write to the test file.
+ */
+async function createTestFileForSelectedCode(testFileName: string, unitTests: string) {
+    const editor = vscode.window.activeTextEditor;
+    if (editor) {
+        const folderPath = path.dirname(editor.document.fileName); // Get the directory of the current file
+        const testFilePath = path.join(folderPath, testFileName);
+        await fs.writeFile(testFilePath, unitTests, { encoding: 'utf8' });
+    }
+}
+
+// This method is called when your extension is deactivated
 export function deactivate() {}
