@@ -1,10 +1,22 @@
 import * as vscode from 'vscode';
-import { initializeLLM, generateUnitTests, getRecommendedTestingFrameworks, getTestingFrameworks, generateFileName } from './service';
+// import { initializeLLM, generateUnitTests, getRecommendedTestingFrameworks, getTestingFrameworks, generateFileName } from './service';
 import * as fs from 'fs/promises';
 import path from 'path';
+import { initializeLLM } from './extensionSetup';
+import { 
+    detectLanguages,
+    getCodeReviewResponse, 
+    getFrameworkList, 
+    splitCodeToFunctions, 
+    getFunctionTypes, 
+    getFunctionTypeFocusKeys, 
+    generateTestingCode 
+} from './responseGenerator';
+
 
 export function activate(context: vscode.ExtensionContext) {
     initializeLLM(context);
+
     // Registering the command to generate unit tests for a file
     const genUnitTestFileCommand = vscode.commands.registerCommand('generateUnitTestFile', async () => {
         const uri = await vscode.window.showOpenDialog({
@@ -29,12 +41,49 @@ export function activate(context: vscode.ExtensionContext) {
             context.workspaceState.update("selectedLLM", selectedLLM);
             const apiKey = await getApiKey(context, String(selectedLLM));
             if (apiKey) {
+                const apiKeyString = String(apiKey);
                 const fileUri = uri[0];
                 const filePath = fileUri.fsPath;
-
                 try {
-                    // Read the file content
-                    const content = await fs.readFile(filePath, { encoding: 'utf8' });
+                    const code = await fs.readFile(filePath, { encoding: 'utf8' });
+                    const code_status = await getCodeReviewResponse(code,apiKeyString);
+                    const languages = await detectLanguages(code, apiKeyString);
+                    const selectedLanguage = await showSelectionList(languages);
+                    if(code_status === 'valid'){
+                        const functions = await splitCodeToFunctions(code, apiKeyString);
+                        const frameworks = await getFrameworkList(String(selectedLanguage), apiKeyString);
+                        const selectedFramework = await showSelectionList(frameworks);
+                        for(const func of functions){
+                            const func_types = await getFunctionTypes(String(selectedLanguage), func, apiKeyString);
+                            for(const type of func_types){
+                                const focusKeys = await getFunctionTypeFocusKeys(type, apiKeyString);
+                                for(const key of focusKeys){
+                                    const unittests = await generateTestingCode(String(selectedLanguage), String(selectedFramework), func, type, key, apiKeyString);
+                                    // Create a new test file name
+                                    const testFileName = `${path.basename(filePath, path.extname(filePath))}_test.${extension}`; // Change extension as needed
+                                    const folderPath = path.dirname(uri[0].fsPath); 
+                                    const testFilePath = path.join(folderPath,testFileName);
+                                    await fs.writeFile(testFilePath, unittests, { encoding: 'utf8' });
+                                    vscode.window.showInformationMessage(`Unit tests generated and saved to ${testFilePath}`);
+                                }
+                            }
+                        }
+                    }
+                    else{
+
+                    }
+
+
+
+
+
+
+
+
+
+
+
+
                     const extension = path.extname(filePath).slice(1); // Get the extension without the dot
                     const frameworks: string[] = await getTestingFrameworks(extension, String(apiKey));
                     
@@ -46,12 +95,7 @@ export function activate(context: vscode.ExtensionContext) {
                             // Generate unit tests using the selected framework
                             const unitTests = String(await generateUnitTests(String(selectedFramework), content, String(apiKey)));
 
-                            // Create a new test file name
-                            const testFileName = `${path.basename(filePath, path.extname(filePath))}_test.${extension}`; // Change extension as needed
-                            const folderPath = path.dirname(uri[0].fsPath); 
-                            const testFilePath = path.join(folderPath,testFileName);
-                            await fs.writeFile(testFilePath, unitTests, { encoding: 'utf8' });
-                            vscode.window.showInformationMessage(`Unit tests generated and saved to ${testFilePath}`);
+                            
                         } else {
                             vscode.window.showInformationMessage('No appropriate framework available for this code.');
                         }

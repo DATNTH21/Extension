@@ -40,4 +40,3 @@ export function updateEnvVariable(key: string, value: string): void {
     // Write the updated content back to the .env file
     fs.writeFileSync(envFilePath, updatedEnvContent, 'utf-8');
 }
-
