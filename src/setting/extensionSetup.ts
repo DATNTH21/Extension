@@ -9,7 +9,7 @@ export async function initializeLLM(context: vscode.ExtensionContext) {
     
     if (selectedLLM === 'chatgpt') {
         try {
-            const chatgptResponse = await import('./chatgptResponse');
+            const chatgptResponse = await import('../llms/chatgptResponse');
             generateResponse = chatgptResponse.generateResponse;
             vscode.window.showErrorMessage('Loaded ChatGPT module');
         } catch (err) {
@@ -18,7 +18,7 @@ export async function initializeLLM(context: vscode.ExtensionContext) {
         }
     } else if (selectedLLM === 'gemini') {
         try {
-            const geminiResponse = await import('./geminiResponse');
+            const geminiResponse = await import('../llms/geminiResponse');
             generateResponse = geminiResponse.generateResponse;
             vscode.window.showErrorMessage('Failed to load Gemini module');
         } catch (err) {

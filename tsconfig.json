@@ -13,7 +13,7 @@
     },
     "include": [
       "src/**/*"                                   // Include all TypeScript files in the "src" directory
-    ],
+, "./geminiResponse.ts", "coverage.ts"    ],
     "exclude": [
       "node_modules",                              // Exclude node_modules directory
       "**/*.spec.ts"                               // Exclude test files if you're using them
