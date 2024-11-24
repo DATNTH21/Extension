@@ -1,0 +1,20 @@
+For the public methods in the UserManager class, identify private methods or helper methods that are internally called as part of the implementation. 
+List these methods and their order of invocation, if applicable. 
+Return the result in JSON format.
+
+Code Input Example:
+def add_user(self, username, email):
+    if not self._is_email_valid(email):
+        raise ValueError("Invalid email")
+    self.database["users"].append({"username": username, "email": email})
+    self.notification_service.send_welcome_email(email)
+
+Output Example:
+"chained_methods": {
+    "add_user": ["_is_email_valid"]
+  }
+
+Code Input:
+{sourcecode}
+Output?
+

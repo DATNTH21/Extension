@@ -1,0 +1,47 @@
+Provide a mock setup for the identified dependencies in the constructor and other external services.
+Specify the expected inputs and outputs for each dependency and the behavior they should mimic during the test. 
+Return the result in JSON format with keys: mock_setup, test_input, and expected_output.
+
+Code Input Example:
+from unittest.mock import Mock
+
+mock_database = {"users": []}
+mock_notification_service = Mock()
+user_manager = UserManager(mock_database, mock_notification_service)
+
+# Test input
+username = "johndoe"
+email = "johndoe@example.com"
+user_manager.add_user(username, email)
+
+Output Example:
+{
+  "mock_setup": {
+    "database": {"users": []},
+    "notification_service": "MockNotificationService"
+  },
+  "test_input": {
+    "username": "johndoe",
+    "email": "johndoe@example.com"
+  },
+  "expected_output": {
+    "database": {
+      "users": [
+        {
+          "username": "johndoe",
+          "email": "johndoe@example.com"
+        }
+      ]
+    },
+    "notification_service_calls": [
+      {
+        "method": "send_welcome_email",
+        "args": ["johndoe@example.com"]
+      }
+    ]
+  }
+}
+
+Code Input:
+{sourcecode}
+Output?

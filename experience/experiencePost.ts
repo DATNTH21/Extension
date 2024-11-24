@@ -21,14 +21,14 @@ import { generateResponse } from './geminiResponse';
 // Use the function
 export async function getCodeStruct(source: string, apiKey: string): Promise<string> {
     apiKey = 'AIzaSyDXmoUw6_s7FgJiSKKAPcDvJgaLJ1xMVrw'; // Assuming you're getting your API key from an environment variable
-    const getCodeCoveragePromptFile = path.join(__dirname, 'prompts/getCodeStruct.txt');
+    const getCodeCoveragePromptFile = path.join(__dirname, 'prompts/postprocessing/getCodeStruct.txt');
     const fileCode = path.join(__dirname, 'Input/source.txt');
     const prompt = fa.readFileSync(getCodeCoveragePromptFile, 'utf8');
     source = fa.readFileSync(fileCode, 'utf8');
     const input = prompt + '\n' + source;
     try{
         const result = await generateResponse(input, apiKey);
-        const filePathOut = path.join(__dirname, 'Output/StructCode.txt');
+        const filePathOut = path.join(__dirname, 'Output/postprocessing/StructCode.txt');
         await fs.writeFile(filePathOut, result, { encoding: 'utf8' });
         return result;
     }                                   
@@ -46,14 +46,14 @@ export async function getTestStruct(source: string, test: string, apiKey: string
     source = fa.readFileSync(fileCode, 'utf8');
     test = fa.readFileSync(fileTest,'utf8');
 
-    const getTestCoveragePromptFile = path.join(__dirname, 'prompts/getTestStruct.txt');
+    const getTestCoveragePromptFile = path.join(__dirname, 'prompts/postprocessing/getTestStruct.txt');
     const prompt = fa.readFileSync(getTestCoveragePromptFile, 'utf8');
     var input = prompt.replace('{Sourcecode}', source);
     input = input.replace('{Testcode}', test);
     console.log(input);
     try{
         const result = await generateResponse(input, apiKey);
-        const filePathOut = path.join(__dirname, 'Output/StructTest.txt');
+        const filePathOut = path.join(__dirname, 'Output/postprocessing/StructTest.txt');
         await fs.writeFile(filePathOut, result, { encoding: 'utf8' });
         return result;
     }                                   
@@ -67,7 +67,7 @@ export async function getTestStruct(source: string, test: string, apiKey: string
 export async function getCoverageReport(source: string, test: string, apiKey: string): Promise<string> {
     apiKey = 'AIzaSyDXmoUw6_s7FgJiSKKAPcDvJgaLJ1xMVrw'; // Assuming you're getting your API key from an environment variable
     
-    const getCoveragePromptFile = path.join(__dirname, 'prompts/getCoverage.txt');
+    const getCoveragePromptFile = path.join(__dirname, 'prompts/postprocessing/getCoverage.txt');
     const prompt = fa.readFileSync(getCoveragePromptFile, 'utf8');
     const CodeStruct = await getCodeStruct(source,apiKey);
     const TestStruct = await getTestStruct(source, test, apiKey);
@@ -78,7 +78,7 @@ export async function getCoverageReport(source: string, test: string, apiKey: st
 
     try{
         const result = await generateResponse(input, apiKey);
-        const filePathOut = path.join(__dirname, 'Output/TestCoverage.txt');
+        const filePathOut = path.join(__dirname, 'Output/postprocessing/TestCoverage.txt');
         await fs.writeFile(filePathOut, result, { encoding: 'utf8' });
         return result;
     }                                   
@@ -91,7 +91,7 @@ export async function getCoverageReport(source: string, test: string, apiKey: st
 
 export async function checkUncovered(source: string, test: string, apiKey: string): Promise<string> {
     apiKey = 'AIzaSyDXmoUw6_s7FgJiSKKAPcDvJgaLJ1xMVrw'; // Assuming you're getting your API key from an environment variable
-    const getPromptFile = path.join(__dirname, 'prompts/checkUncovered.txt');
+    const getPromptFile = path.join(__dirname, 'prompts/postprocessing/checkUncovered.txt');
     const prompt = fa.readFileSync(getPromptFile, 'utf8');
     const fileCode = path.join(__dirname, 'Input/source.txt');
     const fileTest = path.join(__dirname, 'Input/test90.txt');
@@ -106,7 +106,7 @@ export async function checkUncovered(source: string, test: string, apiKey: strin
     input = input.replace('{report}', report);
     try{
         const result = await generateResponse(input, apiKey);
-        const filePathOut = path.join(__dirname, 'Output/CheckedTestCoverage.txt');
+        const filePathOut = path.join(__dirname, 'Output/postprocessing/CheckedTestCoverage.txt');
         await fs.writeFile(filePathOut, result, { encoding: 'utf8' });
         return result;
     }                                   
@@ -119,7 +119,7 @@ export async function checkUncovered(source: string, test: string, apiKey: strin
 
 export async function checkUncoverage(source: string, test: string, apiKey: string): Promise<string> {
     apiKey = 'AIzaSyDXmoUw6_s7FgJiSKKAPcDvJgaLJ1xMVrw'; // Assuming you're getting your API key from an environment variable
-    const getPromptFile = path.join(__dirname, 'prompts/checkCoverage.txt');
+    const getPromptFile = path.join(__dirname, 'prompts/postprocessing/checkCoverage.txt');
     const prompt = fa.readFileSync(getPromptFile, 'utf8');
     const fileCode = path.join(__dirname, 'Input/source.txt');
     const fileTest = path.join(__dirname, 'Input/test90.txt');
@@ -134,7 +134,7 @@ export async function checkUncoverage(source: string, test: string, apiKey: stri
     // input = input.replace('{report}', report);
     try{
         const result = await generateResponse(input, apiKey);
-        const filePathOut = path.join(__dirname, 'Output/CheckedCoverage.txt');
+        const filePathOut = path.join(__dirname, 'Output/postprocessing/CheckedCoverage.txt');
         await fs.writeFile(filePathOut, result, { encoding: 'utf8' });
         return result;
     }                                   

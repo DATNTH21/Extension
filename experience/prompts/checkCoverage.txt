@@ -1,6 +1,0 @@
-Source Code:
-{sourcecode}
-Test Code:
-{testcode}
-Write Test Coverage Report (format json)?
-
