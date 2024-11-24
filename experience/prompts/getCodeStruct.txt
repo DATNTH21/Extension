@@ -1,0 +1,44 @@
+Analyze the following source code and extract: 
+1. All functions or methods with their names and line ranges. 
+2. Any conditional branches and their line numbers.
+
+Example: 
+Input Source code:
+def greet(name):
+    if not name:
+        raise ValueError("Name is required")
+    return f"Hello, {name}"
+
+def classify_number(num):
+    if num > 0:
+        return "Positive"
+    elif num < 0:
+        return "Negative"
+    else:
+        return "Zero"
+
+Example Output:
+{
+  "functions": [
+    {
+    "name": "greet", 
+    "lines": [1, 5],
+    "branches": [
+      {"condition": "if not name", "cases": ["empty", "none as name"]},
+      {"condition": "else", "cases": ["valid name"]}
+    ]
+    },
+    {
+    "name": "classify_number",
+    "lines": [6, 13]
+    "branches": [
+      {"condition": " if num > 0", "cases": ["Typical Positive Numbers", "Boundary Conditions", "Float or Decimal Values", "Extreme Positive Values"]},
+      {"condition": " elif num < 0", "cases": ["Typical Negative Numbers", "Boundary Conditions", "Decimal Negative Numbers", "Extreme Negative Values"]},
+      {"condition": " else", "cases": ["0"]}
+    ]
+    }
+  ]
+}
+
+
+For this Source Code:

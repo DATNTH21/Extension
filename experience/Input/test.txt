@@ -1,0 +1,99 @@
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+class ComplexLogicTest {
+
+    ComplexLogic logic = new ComplexLogic();
+
+    // Test for evaluate()
+    @Test
+    void testEvaluate() {
+        assertEquals("Negative number", logic.evaluate(-1, null));
+        assertEquals("Zero with no text", logic.evaluate(0, ""));
+        assertEquals("Zero with text: Hello", logic.evaluate(0, "Hello"));
+        assertEquals("Positive with long text", logic.evaluate(10, "LongTextHere"));
+        assertEquals("Positive with short or no text", logic.evaluate(10, "Hi"));
+    }
+
+    // Test for readFile()
+    @Test
+    void testReadFile() throws IOException {
+        // Mock file reading behavior
+        String filePath = "test.txt";
+        String expectedContent = "File content";
+
+        // Use Mockito to mock static methods from Files
+        Files mockFiles = mock(Files.class);
+        when(Files.readString(Paths.get(filePath))).thenReturn(expectedContent);
+
+        String result = logic.readFile(filePath);
+        assertEquals(expectedContent, result);
+    }
+
+    @Test
+    void testReadFileInvalidPath() {
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> logic.readFile(""));
+        assertEquals("File path cannot be null or empty", exception.getMessage());
+    }
+
+    // Test for randomOutcome()
+    @Test
+    void testRandomOutcome() {
+        Random mockRandom = mock(Random.class);
+
+        // Test Low outcome
+        when(mockRandom.nextInt(100)).thenReturn(20);
+        assertEquals("Low", logic.randomOutcome());
+
+        // Test Medium outcome
+        when(mockRandom.nextInt(100)).thenReturn(50);
+        assertEquals("Medium", logic.randomOutcome());
+
+        // Test High outcome
+        when(mockRandom.nextInt(100)).thenReturn(90);
+        assertEquals("High", logic.randomOutcome());
+    }
+
+    // Test for processInput()
+    @Test
+    void testProcessInputValidEvenNumber() {
+        assertEquals("Even number", logic.processInput("4"));
+    }
+
+    @Test
+    void testProcessInputValidOddNumber() {
+        assertEquals("Odd number", logic.processInput("5"));
+    }
+
+    @Test
+    void testProcessInputInvalidNumberFormat() {
+        assertEquals("Invalid number format", logic.processInput("NotANumber"));
+    }
+
+    @Test
+    void testProcessInputUnexpectedError() {
+        // Mock exception scenario if needed
+    }
+
+    // Test for calculateFactorial()
+    @Test
+    void testCalculateFactorial() {
+        assertEquals(1, logic.calculateFactorial(0));
+        assertEquals(1, logic.calculateFactorial(1));
+        assertEquals(120, logic.calculateFactorial(5));
+    }
+
+    @Test
+    void testCalculateFactorialNegative() {
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> logic.calculateFactorial(-1));
+        assertEquals("Negative numbers not allowed", exception.getMessage());
+    }
+}

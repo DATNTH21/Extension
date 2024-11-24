@@ -1,0 +1,3 @@
+cd experience
+npx tsc experience.ts
+node experience.js

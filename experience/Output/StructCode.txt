@@ -1,0 +1,76 @@
+```json
+{
+  "functions": [
+    {
+      "name": "evaluate",
+      "lines": [10, 28],
+      "branches": [
+        {
+          "condition": "number < 0",
+          "cases": ["Negative numbers"]
+        },
+        {
+          "condition": "number == 0",
+          "cases": ["Zero with no text", "Zero with text"]
+        },
+        {
+          "condition": "else",
+          "cases": ["Positive with long text", "Positive with short or no text"]
+        }
+      ]
+    },
+    {
+      "name": "readFile",
+      "lines": [31, 40],
+      "branches": [
+        {
+          "condition": "filePath == null || filePath.isEmpty()",
+          "cases": ["Null or empty file path", "Valid file path"]
+        }
+      ]
+    },
+    {
+      "name": "randomOutcome",
+      "lines": [43, 55],
+      "branches": [
+        {
+          "condition": "value < 30",
+          "cases": ["Values below 30"]
+        },
+        {
+          "condition": "value < 70",
+          "cases": ["Values between 30 and 69"]
+        },
+        {
+          "condition": "else",
+          "cases": ["Values 70 and above"]
+        }
+      ]
+    },
+    {
+      "name": "processInput",
+      "lines": [58, 74],
+      "branches": [
+        {
+          "condition": "number % 2 == 0",
+          "cases": ["Even numbers", "Odd Numbers"]
+        }
+      ]
+    },
+    {
+      "name": "calculateFactorial",
+      "lines": [77, 83],
+      "branches": [
+        {
+          "condition": "n < 0",
+          "cases": ["Negative numbers", "Non-negative numbers"]
+        },
+        {
+          "condition": "n == 0",
+          "cases": ["n equals 0", "n does not equal 0"]
+        }
+      ]
+    }
+  ]
+}
+```

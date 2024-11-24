@@ -9,8 +9,8 @@ import {
     getCodeReviewResponse, 
     getFrameworkList, 
     splitCodeToFunctions, 
-    getFunctionTypes, 
-    getFunctionTypeFocusKeys, 
+    // getFunctionTypes, 
+    // getFunctionTypeFocusKeys, 
     generateTestingCode 
 } from './responseGenerator';
 
@@ -34,9 +34,9 @@ export function activate(context: vscode.ExtensionContext) {
 
         let selectedLLM = context.workspaceState.get("selectedLLM");
 
-        if (!selectedLLM) {
-            selectedLLM = await showSelectionList(['chatgpt', 'gemini']);
-        }
+        // if (!selectedLLM) {
+        //     selectedLLM = await showSelectionList(['chatgpt', 'gemini']);
+        // }
 
         if (selectedLLM) {
             // context.workspaceState.update("selectedLLM", selectedLLM);
@@ -71,8 +71,8 @@ export function activate(context: vscode.ExtensionContext) {
                                     // const focusKeys = await getFunctionTypeFocusKeys(type, apiKeyString);
                                     // vscode.window.showInformationMessage(`Focus Keys for type ${type}: ${focusKeys}}`);
                                     // for (const key of focusKeys) {
-                                        const testingCodes = await generateTestingCode(String(selectedLanguage), String(selectedFramework), func, apiKeyString);
-                                        unittests.push(...testingCodes); // Ensure testingCodes is defined
+                                const testingCodes = await generateTestingCode(String(selectedLanguage), String(selectedFramework), func, apiKeyString);
+                                unittests.push(...testingCodes); // Ensure testingCodes is defined
                                     // }
                                 //}
                             }
@@ -105,7 +105,7 @@ export function activate(context: vscode.ExtensionContext) {
     // // Registering the command to generate unit tests for a folder
     // const genUnitTestFolderCommand = vscode.commands.registerCommand('generateUnitTestFolder', async () => {
     //     const folderUri = await vscode.window.showOpenDialog({
-    //         canSelectMany: false,
+    //         canSelectMany: false,ef
     //         openLabel: 'Select a folder',
     //         canSelectFolders: true,
     //     });

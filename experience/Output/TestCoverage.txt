@@ -1,0 +1,159 @@
+```json
+{
+  "function_coverage": [
+    {
+      "test_function": "testEvaluate",
+      "source_function": "evaluate"
+    },
+    {
+      "test_function": "testReadFile",
+      "source_function": "readFile"
+    },
+    {
+      "test_function": "testReadFileInvalidPath",
+      "source_function": "readFile"
+    },
+    {
+      "test_function": "testProcessInputValidEvenNumber",
+      "source_function": "processInput"
+    },
+    {
+      "test_function": "testProcessInputValidOddNumber",
+      "source_function": "processInput"
+    },
+    {
+      "test_function": "testProcessInputInvalidNumberFormat",
+      "source_function": "processInput"
+    },
+    {
+      "test_function": "testProcessInputUnexpectedError",
+      "source_function": "processInput"
+    },
+    {
+      "test_function": "testCalculateFactorialNegative",
+      "source_function": "calculateFactorial"
+    }
+  ],
+  "line_coverage": [
+    {
+      "source_function": "evaluate",
+      "lines_covered": [10, 28]
+    },
+    {
+      "source_function": "readFile",
+      "lines_covered": [31, 40]
+    },
+    {
+      "source_function": "processInput",
+      "lines_covered": [58, 74]
+    },
+    {
+      "source_function": "calculateFactorial",
+      "lines_covered": [77, 83]
+    }
+  ],
+  "branch_coverage": [
+    {
+      "source_function": "evaluate",
+      "branches": [
+        {
+          "condition": "number < 0",
+          "tested_cases": ["Negative numbers"],
+          "untested_cases": []
+        },
+        {
+          "condition": "number == 0",
+          "tested_cases": ["Zero with no text", "Zero with text"],
+          "untested_cases": []
+        },
+        {
+          "condition": "else",
+          "tested_cases": ["Positive with long text", "Positive with short or no text"],
+          "untested_cases": []
+        }
+      ]
+    },
+    {
+      "source_function": "readFile",
+      "branches": [
+        {
+          "condition": "filePath == null || filePath.isEmpty()",
+          "tested_cases": ["Null or empty file path"],
+          "untested_cases": ["Valid file path"]
+        }
+      ]
+    },
+    {
+      "source_function": "processInput",
+      "branches": [
+        {
+          "condition": "number % 2 == 0",
+          "tested_cases": ["Even numbers", "Odd Numbers"],
+          "untested_cases": []
+        }
+      ]
+    },
+    {
+      "source_function": "calculateFactorial",
+      "branches": [
+        {
+          "condition": "n < 0",
+          "tested_cases": ["Negative numbers"],
+          "untested_cases": ["Non-negative numbers"]
+        },
+        {
+          "condition": "n == 0",
+          "tested_cases": [],
+          "untested_cases": ["n equals 0", "n does not equal 0"]
+        }
+      ]
+    }
+  ],
+  "uncovered": {
+    "functions": [
+      "randomOutcome"
+    ],
+    "branches": [
+      {
+        "source_function": "readFile",
+        "branches": [
+          {
+            "condition": "filePath == null || filePath.isEmpty()",
+            "untested_cases": ["Valid file path"]
+          }
+        ]
+      },
+      {
+        "source_function": "randomOutcome",
+        "branches": [
+          {
+            "condition": "value < 30",
+            "untested_cases": ["Values below 30"]
+          },
+          {
+            "condition": "value < 70",
+            "untested_cases": ["Values between 30 and 69"]
+          },
+          {
+            "condition": "else",
+            "untested_cases": ["Values 70 and above"]
+          }
+        ]
+      },
+      {
+        "source_function": "calculateFactorial",
+        "branches": [
+          {
+            "condition": "n < 0",
+            "untested_cases": ["Non-negative numbers"]
+          },
+          {
+            "condition": "n == 0",
+            "untested_cases": ["n equals 0", "n does not equal 0"]
+          }
+        ]
+      }
+    ]
+  }
+}
+```

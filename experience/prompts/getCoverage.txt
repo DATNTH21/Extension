@@ -1,0 +1,106 @@
+Using the following source code and test code details: 
+1. Map the tested functions to the source functions. 
+2. Identify lines in the source code that are covered or uncovered. 
+3. Determine the branches that are tested or not tested. 
+
+Example Input: 
+  "source_code": {
+    "functions": [
+        {
+        "name": "greet", 
+        "lines": [1, 5],
+        "branches": [
+        {"condition": "if not name", "cases": ["empty", "none as name"]},
+        {"condition": "else", "cases": ["valid name"]}
+        ]
+        },
+        {
+        "name": "classify_number",
+        "lines": [6, 13]
+        "branches": [
+        {"condition": " if num > 0", "cases": ["Typical Positive Numbers", "Boundary Conditions", "Float or Decimal Values", "Extreme Positive Values"]},
+        {"condition": " elif num < 0", "cases": ["Typical Negative Numbers", "Boundary Conditions", "Decimal Negative Numbers", "Extreme Negative Values"]},
+        {"condition": " else", "cases": ["0"]}
+        ]
+        }
+    ]
+},
+  "test_code": {
+    "test_functions": [
+    {
+      "name": "test_greet",
+      "tested_functions": ["greet"],
+      "test_branches": [{
+        "condition": "if not name",
+        "cases": "empty", "none as name"
+      },
+      {
+        "condition": "else",
+        "cases": "valid name"
+      }
+      ]
+    }
+    ],
+}
+Example Output: 
+{
+  "function_coverage": [
+    {
+      "test_function": "test_greet",
+      "source_function": "greet"
+    }
+  ],
+  "line_coverage": [
+    {
+      "source_function": "greet",
+      "lines_covered": [1, 5]
+    }
+  ],
+  "branch_coverage": [
+    {
+      "source_function": "greet",
+      "branches": [
+        {
+          "condition": "if not name",
+          "tested_cases": ["empty", "none as name"],
+          "untested_cases": []
+        },
+        {
+          "condition": "else",
+          "tested_cases": ["valid name"],
+          "untested_cases": []
+        }
+      ]
+    }
+  ],
+  "uncovered": {
+    "functions": [
+      {
+        "name": "classify_number"
+      }
+    ],
+    "branches": [
+      {
+        "source_function": "classify_number",
+        "branches": [
+          {
+            "condition": "if num > 0",
+            "untested_cases": ["Typical Positive Numbers", "Boundary Conditions", "Float or Decimal Values", "Extreme Positive Values"]
+          },
+          {
+            "condition": "elif num < 0",
+            "untested_cases": ["Typical Negative Numbers", "Boundary Conditions", "Decimal Negative Numbers", "Extreme Negative Values"]
+          },
+          {
+            "condition": "else",
+            "untested_cases": ["0"]
+          }
+        ]
+      }
+    ]
+  }
+}
+Input:
+"source_code": {sourceCode},
+"test_code": {testCode}
+Output?
