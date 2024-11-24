@@ -27,7 +27,7 @@ public class ComplexLogic {
 
 
     // Method with external dependency (file reading)
-    public String readFile(String filePath) throws IOException {
+    private String readFile(String filePath) throws IOException {
         if (filePath == null || filePath.isEmpty()) {
             throw new IllegalArgumentException("File path cannot be null or empty");
         }

@@ -1,17 +1,4 @@
-//// TEST
-// Import the generateResponse function from geminiService
-import { 
-    detectLanguages,
-    getCodeReviewResponse, 
-    getFrameworkList, 
-    splitCodeToFunctions, 
-    getFunctionTypes, 
-    getFunctionTypeFocusKeys, 
-    generateTestingCode 
-} from './responseGenerator';
 import * as fa from 'fs';
-import {readFileContent, createTestFile} from './file_utils'
-import * as vscode from 'vscode';
 import * as path from 'path';
 import { promises as fs } from 'fs';
 import { generateResponse } from './geminiResponse';
@@ -149,4 +136,4 @@ export async function checkUncoverage(source: string, test: string, apiKey: stri
 // getTestCoverage('','' ,'' );
 // getCoverageReport('', '', '');
 // checkUncovered('', '', '');
-checkUncoverage('', '', '');
+// checkUncoverage('', '', '');

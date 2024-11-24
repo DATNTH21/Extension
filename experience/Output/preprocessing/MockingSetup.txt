@@ -1,0 +1,53 @@
+```json
+{
+  "mock_setup": {
+    "file_system": {
+      "test_file.txt": "This is a test file."
+    },
+    "random": {
+      "nextInt_return_values": [25, 80, 10] 
+    }
+  },
+  "test_input": {
+    "evaluate": [
+      {-1, "test"},
+      {0, null},
+      {0, "hello"},
+      {5, "short"},
+      {5, "This is a long text"}
+    ],
+    "readFile": ["test_file.txt", "nonexistent_file.txt"],
+    "randomOutcome": [],
+    "processInput": ["10", "abc", "25"],
+    "calculateFactorial":[5,-1,0]
+  },
+  "expected_output": {
+    "evaluate": [
+      "Negative number",
+      "Zero with no text",
+      "Zero with text: hello",
+      "Positive with short or no text",
+      "Positive with long text"
+    ],
+    "readFile": [
+      "This is a test file.",
+      "java.nio.file.NoSuchFileException: nonexistent_file.txt"
+    ],
+    "randomOutcome": [
+      "Low",
+      "High",
+      "Low"
+    ],
+    "processInput": [
+      "Even number",
+      "Invalid number format",
+      "Odd number"
+    ],
+    "calculateFactorial":[
+      120,
+      "java.lang.IllegalArgumentException: Negative numbers not allowed",
+      1
+    ]
+  }
+}
+```

@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.getCodeStruct = exports.getTestScope = void 0;
+exports.getMockingSetup = exports.getChainToPrivateMethods = exports.getAuxiliaryMethods = exports.getConstructors = exports.getTestScope = void 0;
 var fa = require("fs");
 var path = require("path");
 var fs_1 = require("fs");
@@ -75,29 +75,25 @@ function getTestScope(source, apiKey) {
     });
 }
 exports.getTestScope = getTestScope;
-function getCodeStruct(source, test, apiKey) {
+function getConstructors(source, apiKey) {
     return __awaiter(this, void 0, void 0, function () {
-        var fileCode, fileTest, getTestCoveragePromptFile, prompt, input, result, filePathOut, err_2;
+        var getPromptFile, prompt, fileCode, input, result, filePathOut, err_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     apiKey = 'AIzaSyDXmoUw6_s7FgJiSKKAPcDvJgaLJ1xMVrw'; // Assuming you're getting your API key from an environment variable
+                    getPromptFile = path.join(__dirname, 'prompts/preprocessing/getConstructors.txt');
+                    prompt = fa.readFileSync(getPromptFile, 'utf8');
                     fileCode = path.join(__dirname, 'Input/source.txt');
-                    fileTest = path.join(__dirname, 'Input/test90.txt');
                     source = fa.readFileSync(fileCode, 'utf8');
-                    test = fa.readFileSync(fileTest, 'utf8');
-                    getTestCoveragePromptFile = path.join(__dirname, 'prompts/preprocessing/getTestStruct.txt');
-                    prompt = fa.readFileSync(getTestCoveragePromptFile, 'utf8');
-                    input = prompt.replace('{Sourcecode}', source);
-                    input = input.replace('{Testcode}', test);
-                    console.log(input);
+                    input = prompt.replace('{sourcecode}', source);
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 4, , 5]);
                     return [4 /*yield*/, (0, geminiResponse_1.generateResponse)(input, apiKey)];
                 case 2:
                     result = _a.sent();
-                    filePathOut = path.join(__dirname, 'Output/preprocessing/StructTest.txt');
+                    filePathOut = path.join(__dirname, 'Output/preprocessing/Constructors.txt');
                     return [4 /*yield*/, fs_1.promises.writeFile(filePathOut, result, { encoding: 'utf8' })];
                 case 3:
                     _a.sent();
@@ -111,5 +107,108 @@ function getCodeStruct(source, test, apiKey) {
         });
     });
 }
-exports.getCodeStruct = getCodeStruct;
-getTestScope('', '');
+exports.getConstructors = getConstructors;
+function getAuxiliaryMethods(source, apiKey) {
+    return __awaiter(this, void 0, void 0, function () {
+        var getPromptFile, prompt, fileCode, input, result, filePathOut, err_3;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    apiKey = 'AIzaSyDXmoUw6_s7FgJiSKKAPcDvJgaLJ1xMVrw'; // Assuming you're getting your API key from an environment variable
+                    getPromptFile = path.join(__dirname, 'prompts/preprocessing/getAuxiliaryMethods.txt');
+                    prompt = fa.readFileSync(getPromptFile, 'utf8');
+                    fileCode = path.join(__dirname, 'Input/source.txt');
+                    source = fa.readFileSync(fileCode, 'utf8');
+                    input = prompt.replace('{sourcecode}', source);
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 4, , 5]);
+                    return [4 /*yield*/, (0, geminiResponse_1.generateResponse)(input, apiKey)];
+                case 2:
+                    result = _a.sent();
+                    filePathOut = path.join(__dirname, 'Output/preprocessing/AuxiliaryMethods.txt');
+                    return [4 /*yield*/, fs_1.promises.writeFile(filePathOut, result, { encoding: 'utf8' })];
+                case 3:
+                    _a.sent();
+                    return [2 /*return*/, result];
+                case 4:
+                    err_3 = _a.sent();
+                    console.error('Error reading file:', err_3);
+                    throw err_3;
+                case 5: return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.getAuxiliaryMethods = getAuxiliaryMethods;
+function getChainToPrivateMethods(source, apiKey) {
+    return __awaiter(this, void 0, void 0, function () {
+        var getPromptFile, prompt, fileCode, input, result, filePathOut, err_4;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    apiKey = 'AIzaSyDXmoUw6_s7FgJiSKKAPcDvJgaLJ1xMVrw'; // Assuming you're getting your API key from an environment variable
+                    getPromptFile = path.join(__dirname, 'prompts/preprocessing/getChainToPrivateMethods.txt');
+                    prompt = fa.readFileSync(getPromptFile, 'utf8');
+                    fileCode = path.join(__dirname, 'Input/source.txt');
+                    source = fa.readFileSync(fileCode, 'utf8');
+                    input = prompt.replace('{sourcecode}', source);
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 4, , 5]);
+                    return [4 /*yield*/, (0, geminiResponse_1.generateResponse)(input, apiKey)];
+                case 2:
+                    result = _a.sent();
+                    filePathOut = path.join(__dirname, 'Output/preprocessing/ChainToPrivateMethods.txt');
+                    return [4 /*yield*/, fs_1.promises.writeFile(filePathOut, result, { encoding: 'utf8' })];
+                case 3:
+                    _a.sent();
+                    return [2 /*return*/, result];
+                case 4:
+                    err_4 = _a.sent();
+                    console.error('Error reading file:', err_4);
+                    throw err_4;
+                case 5: return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.getChainToPrivateMethods = getChainToPrivateMethods;
+function getMockingSetup(source, apiKey) {
+    return __awaiter(this, void 0, void 0, function () {
+        var getPromptFile, prompt, fileCode, input, result, filePathOut, err_5;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    apiKey = 'AIzaSyDXmoUw6_s7FgJiSKKAPcDvJgaLJ1xMVrw'; // Assuming you're getting your API key from an environment variable
+                    getPromptFile = path.join(__dirname, 'prompts/preprocessing/getMockingSetup.txt');
+                    prompt = fa.readFileSync(getPromptFile, 'utf8');
+                    fileCode = path.join(__dirname, 'Input/source.txt');
+                    source = fa.readFileSync(fileCode, 'utf8');
+                    input = prompt.replace('{sourcecode}', source);
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 4, , 5]);
+                    return [4 /*yield*/, (0, geminiResponse_1.generateResponse)(input, apiKey)];
+                case 2:
+                    result = _a.sent();
+                    filePathOut = path.join(__dirname, 'Output/preprocessing/MockingSetup.txt');
+                    return [4 /*yield*/, fs_1.promises.writeFile(filePathOut, result, { encoding: 'utf8' })];
+                case 3:
+                    _a.sent();
+                    return [2 /*return*/, result];
+                case 4:
+                    err_5 = _a.sent();
+                    console.error('Error reading file:', err_5);
+                    throw err_5;
+                case 5: return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.getMockingSetup = getMockingSetup;
+// getTestScope('','');
+// getConstructors('','');
+// getAuxiliaryMethods('','');
+// getChainToPrivateMethods('','');
+getMockingSetup('', '');
