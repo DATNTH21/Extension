@@ -1,0 +1,132 @@
+```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+class ComplexLogic {
+
+    public String evaluate(int number, String text) {
+        if (number < 0) {
+            return "Negative number";
+        } else if (number == 0) {
+            if (text == null || text.isEmpty()) {
+                return "Text is null or empty";
+            } else {
+                return "Text is not null or empty";
+            }
+        } else {
+            if (text.length() > 5) {
+                return "Text length > 5";
+            } else {
+                return "Text length <= 5";
+            }
+        }
+    }
+
+    public String readFile(String filePath) throws IOException {
+        if (filePath == null || filePath.isEmpty()) {
+            return "File path is null or empty";
+        }
+        return Files.readAllLines(Paths.get(filePath)).stream().collect(Collectors.joining("\n"));
+    }
+
+    public List<String> randomOutcome(int[] values) {
+        Random random = new Random();
+        return List.of(values).stream().map(value -> {
+            if (value < 30) {
+                return "Low";
+            } else if (value < 70) {
+                return "High";
+            } else {
+                return "Very High";
+            }
+        }).collect(Collectors.toList());
+    }
+
+    public String processInput(int number) {
+        if (number % 2 == 0) {
+            return "Even number";
+        } else {
+            return "Odd number";
+        }
+    }
+
+    public int calculateFactorial(int n) {
+        if (n < 0) {
+            return -1; // Indicate error for negative input.
+        } else if (n == 0) {
+            return 1;
+        } else {
+            int result = 1;
+            for (int i = 1; i <= n; i++) {
+                result *= i;
+            }
+            return result;
+        }
+    }
+}
+
+
+public class ComplexLogicTest {
+
+    @TempDir
+    Path tempDir;
+
+    @Test
+    void testEvaluate() {
+        ComplexLogic logic = new ComplexLogic();
+        assertEquals("Negative number", logic.evaluate(-5, "hello"));
+        assertEquals("Text is null or empty", logic.evaluate(0, null));
+        assertEquals("Text is not null or empty", logic.evaluate(0, "world"));
+        assertEquals("Text length > 5", logic.evaluate(5, "abcdefg"));
+        assertEquals("Text length <= 5", logic.evaluate(5, "abcde"));
+    }
+
+    @Test
+    void testReadFile() throws IOException {
+        ComplexLogic logic = new ComplexLogic();
+        Path filePath = tempDir.resolve("test.txt");
+        Files.writeString(filePath, "Test File Content");
+        assertEquals("Test File Content", logic.readFile(filePath.toString()));
+        assertThrows(IOException.class, () -> logic.readFile("nonexistentfile.txt"));
+        assertEquals("File path is null or empty", logic.readFile(null));
+        assertEquals("File path is null or empty", logic.readFile(""));
+
+    }
+
+    @Test
+    void testRandomOutcome() {
+        ComplexLogic logic = new ComplexLogic();
+        Random mockRandom = mock(Random.class);
+        when(mockRandom.nextInt()).thenReturn(25).thenReturn(80).thenReturn(15);
+        //This part needs significant refactoring to use mockRandom, but this requires altering the source
+        //code, which isn't allowed in the prompt.
+        List<String> result = logic.randomOutcome(new int[]{25,80,15});
+        assertEquals(List.of("Low", "Very High", "Low"), result);
+        
+    }
+
+    @Test
+    void testProcessInput() {
+        ComplexLogic logic = new ComplexLogic();
+        assertEquals("Even number", logic.processInput(2));
+        assertEquals("Odd number", logic.processInput(3));
+    }
+
+    @Test
+    void testCalculateFactorial() {
+        ComplexLogic logic = new ComplexLogic();
+        assertEquals(120, logic.calculateFactorial(5));
+        assertEquals(1, logic.calculateFactorial(0));
+        assertEquals(-1, logic.calculateFactorial(-1));
+    }
+}
+```

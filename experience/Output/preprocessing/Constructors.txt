@@ -1,4 +1,4 @@
 ```json
 {}
 ```
-There is no constructor defined in the provided Java code.  The `ComplexLogic` class uses default constructor.  Therefore, there are no constructor dependencies to list.
+There is no constructor defined in the provided Java code.  The `ComplexLogic` class uses methods but doesn't have a constructor that takes any parameters.  Therefore, the JSON output is empty.

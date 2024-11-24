@@ -6,15 +6,9 @@ import { generateResponse } from './geminiResponse';
 
 
 // Use the function
-export async function getTestScope(source: string, apiKey: string): Promise<string> {
-    apiKey = 'AIzaSyDXmoUw6_s7FgJiSKKAPcDvJgaLJ1xMVrw'; // Assuming you're getting your API key from an environment variable
-    
+export async function getTestScope(source: string, apiKey: string): Promise<string> {    
     const getPromptFile = path.join(__dirname, 'prompts/preprocessing/getTestScope.txt');
     const prompt = fa.readFileSync(getPromptFile, 'utf8');
-
-    const fileCode = path.join(__dirname, 'Input/source.txt');
-    source = fa.readFileSync(fileCode, 'utf8');
-
     var input = prompt.replace('{sourcecode}', source);
     try{
         const result = await generateResponse(input, apiKey);
@@ -28,15 +22,9 @@ export async function getTestScope(source: string, apiKey: string): Promise<stri
     }
 }            
 
-export async function getConstructors(source: string, apiKey: string): Promise<string> {
-    apiKey = 'AIzaSyDXmoUw6_s7FgJiSKKAPcDvJgaLJ1xMVrw'; // Assuming you're getting your API key from an environment variable
-    
+export async function getConstructors(source: string, apiKey: string): Promise<string> {    
     const getPromptFile = path.join(__dirname, 'prompts/preprocessing/getConstructors.txt');
     const prompt = fa.readFileSync(getPromptFile, 'utf8');
-
-    const fileCode = path.join(__dirname, 'Input/source.txt');
-    source = fa.readFileSync(fileCode, 'utf8');
-
     var input = prompt.replace('{sourcecode}', source);
     try{
         const result = await generateResponse(input, apiKey);
@@ -50,15 +38,9 @@ export async function getConstructors(source: string, apiKey: string): Promise<s
     }
 }            
 
-export async function getAuxiliaryMethods(source: string, apiKey: string): Promise<string> {
-    apiKey = 'AIzaSyDXmoUw6_s7FgJiSKKAPcDvJgaLJ1xMVrw'; // Assuming you're getting your API key from an environment variable
-    
+export async function getAuxiliaryMethods(source: string, apiKey: string): Promise<string> {    
     const getPromptFile = path.join(__dirname, 'prompts/preprocessing/getAuxiliaryMethods.txt');
     const prompt = fa.readFileSync(getPromptFile, 'utf8');
-
-    const fileCode = path.join(__dirname, 'Input/source.txt');
-    source = fa.readFileSync(fileCode, 'utf8');
-
     var input = prompt.replace('{sourcecode}', source);
     try{
         const result = await generateResponse(input, apiKey);
@@ -71,15 +53,9 @@ export async function getAuxiliaryMethods(source: string, apiKey: string): Promi
         throw err;
     }
 }           
-export async function getChainToPrivateMethods(source: string, apiKey: string): Promise<string> {
-    apiKey = 'AIzaSyDXmoUw6_s7FgJiSKKAPcDvJgaLJ1xMVrw'; // Assuming you're getting your API key from an environment variable
-    
+export async function getChainToPrivateMethods(source: string, apiKey: string): Promise<string> {    
     const getPromptFile = path.join(__dirname, 'prompts/preprocessing/getChainToPrivateMethods.txt');
     const prompt = fa.readFileSync(getPromptFile, 'utf8');
-
-    const fileCode = path.join(__dirname, 'Input/source.txt');
-    source = fa.readFileSync(fileCode, 'utf8');
-
     var input = prompt.replace('{sourcecode}', source);
     try{
         const result = await generateResponse(input, apiKey);
@@ -94,14 +70,8 @@ export async function getChainToPrivateMethods(source: string, apiKey: string): 
 }           
 
 export async function getMockingSetup(source: string, apiKey: string): Promise<string> {
-    apiKey = 'AIzaSyDXmoUw6_s7FgJiSKKAPcDvJgaLJ1xMVrw'; // Assuming you're getting your API key from an environment variable
-    
     const getPromptFile = path.join(__dirname, 'prompts/preprocessing/getMockingSetup.txt');
     const prompt = fa.readFileSync(getPromptFile, 'utf8');
-
-    const fileCode = path.join(__dirname, 'Input/source.txt');
-    source = fa.readFileSync(fileCode, 'utf8');
-
     var input = prompt.replace('{sourcecode}', source);
     try{
         const result = await generateResponse(input, apiKey);
@@ -114,9 +84,25 @@ export async function getMockingSetup(source: string, apiKey: string): Promise<s
         throw err;
     }
 }           
+export async function getCodeStruct(source: string, apiKey: string): Promise<string> {
+    const getCodeCoveragePromptFile = path.join(__dirname, 'prompts/preprocessing/getCodeStruct.txt');
+    const prompt = fa.readFileSync(getCodeCoveragePromptFile, 'utf8');
+    const input = prompt + '\n' + source;
+    try{
+        const result = await generateResponse(input, apiKey);
+        const filePathOut = path.join(__dirname, 'Output/postprocessing/StructCode.txt');
+        await fs.writeFile(filePathOut, result, { encoding: 'utf8' });
+        return result;
+    }                                   
+    catch (err) {
+        console.error('Error reading file:', err);
+        throw err;
+    }
+}            
 
-const testscope = getTestScope('','');
-const constructors = getConstructors('','');
-const auxiliarymethods = getAuxiliaryMethods('','');
-const chainedmethods = getChainToPrivateMethods('','');
-const mockingsetup = getMockingSetup('','');
+// const testscope = getTestScope('','');
+// const constructors = getConstructors('','');
+// const auxiliarymethods = getAuxiliaryMethods('','');
+// const chainedmethods = getChainToPrivateMethods('','');
+// const mockingsetup = getMockingSetup('','');
+
