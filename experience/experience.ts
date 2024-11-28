@@ -1,215 +1,166 @@
 import { generateResponse } from './geminiResponse';
 import * as fs from 'fs/promises';
 
-const prompt = `Prompt: Analyze the following file and identify logical units that should be tested independently for unit testing. Break the file into code snippet parts based on the following considerations:
+const prompt = `Prompt: Analyze the following code snippet and identify logical units that should be tested independently for unit testing based on the following considerations:
 1. Functions, classes, or modules that handle specific responsibilities.
 2. Groupings by behavior or purpose, such as input/output handling, core business logic, and error handling.
 3. Dependencies and integrations with external systems that need mocking.
-Format those code snippet parts into a single plain-text string, with each separated by the pattern :>. Do not include explanations or additional information.
+Then break the whole code into code snippet parts based on your analyzation, format those code snippet parts into a single plain-text string, with each separated by the pattern :>. Do not include explanations or additional information.
 Here is the code:
-import java.util.ArrayList;
-import java.util.List;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
-public class DirtyJavaFile {
+namespace MyUnorganizedApp
+{
+    // Simple class to hold user details
+    public class User
+    {
+        public string Name { get; set; }
+        public int Age { get; set; }
+        public string Email { get; set; }
 
-    // Global variables with unnecessary dependencies
-    public static String globalMessage = "Initialized";
-    private static int totalCounter = 0;
-    private static boolean isRunning = false;
-
-    // Simple class with state
-    static class SimpleClass1 {
-        private String name;
-
-        public SimpleClass1(String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void printName() {
-            System.out.println("Name: " + name);
+        public User(string name, int age, string email)
+        {
+            Name = name;
+            Age = age;
+            Email = email;
         }
     }
 
-    // Another simple class with a static counter
-    static class SimpleClass2 {
-        public static int counter = 0;
-
-        public void incrementCounter() {
-            counter++;
+    // Utility functions for email validation
+    public static class EmailUtils
+    {
+        public static bool IsValidEmail(string email)
+        {
+            return email.Contains("@") && email.Contains(".");
         }
 
-        public int getCounter() {
-            return counter;
-        }
-    }
+        public static string MaskEmail(string email)
+        {
+            int atIndex = email.IndexOf('@');
+            if (atIndex <= 1) return email;
 
-    // A simple utility class that does nothing meaningful
-    static class SimpleUtility {
-        public void performTask() {
-            System.out.println("Performing task...");
-        }
-
-        public String getInfo() {
-            return "This is a simple utility.";
+            string masked = email.Substring(0, 1) + new string('*', atIndex - 1) + email.Substring(atIndex);
+            return masked;
         }
     }
 
-    // Complex class handling multiple responsibilities
-    static class ComplexClass1 {
-        private List<Integer> data = new ArrayList<>();
-        private String description;
+    // Class for handling user registration
+    public class RegistrationHandler
+    {
+        private List<User> _users = new List<User>();
 
-        public ComplexClass1(String description) {
-            this.description = description;
-        }
-
-        public void addData(int value) {
-            data.add(value);
-        }
-
-        public void printData() {
-            System.out.println(description + " Data: " + data);
-        }
-
-        public int computeSum() {
-            int sum = 0;
-            for (int num : data) {
-                sum += num;
+        public void RegisterUser(string name, int age, string email)
+        {
+            if (!EmailUtils.IsValidEmail(email))
+            {
+                Console.WriteLine("Invalid email address.");
+                return;
             }
-            return sum;
+
+            _users.Add(new User(name, age, email));
+            Console.WriteLine($"User {name} registered successfully.");
         }
 
-        public void resetData() {
-            data.clear();
-        }
-    }
-
-    // Another complex class with multiple methods doing different things
-    static class ComplexClass2 {
-        private List<String> messages = new ArrayList<>();
-        private boolean isActive;
-
-        public ComplexClass2(boolean isActive) {
-            this.isActive = isActive;
-        }
-
-        public void addMessage(String message) {
-            messages.add(message);
-        }
-
-        public void toggleStatus() {
-            isActive = !isActive;
-        }
-
-        public String getStatus() {
-            return isActive ? "Active" : "Inactive";
-        }
-
-        public void printMessages() {
-            System.out.println("Messages: " + messages);
-        }
-
-        public void clearMessages() {
-            messages.clear();
+        public void ListUsers()
+        {
+            foreach (var user in _users)
+            {
+                Console.WriteLine($"Name: {user.Name}, Age: {user.Age}, Email: {EmailUtils.MaskEmail(user.Email)}");
+            }
         }
     }
 
-    // Yet another complex class with multiple concerns
-    static class ComplexClass3 {
-        private int calculationValue;
-        private String label;
-
-        public ComplexClass3(String label) {
-            this.label = label;
-        }
-
-        public void setCalculationValue(int value) {
-            this.calculationValue = value;
-        }
-
-        public int performCalculation() {
-            return calculationValue * 2; // Arbitrary calculation
-        }
-
-        public void printLabel() {
-            System.out.println("Label: " + label);
-        }
-
-        public void resetCalculation() {
-            this.calculationValue = 0;
+    // Unrelated functions for random string generation
+    public static class RandomUtils
+    {
+        public static string GenerateRandomString(int length)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var random = new Random();
+            return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
         }
     }
 
-    // A function with random utility
-    public static void performTask() {
-        System.out.println("Task started...");
-        SimpleClass1 class1 = new SimpleClass1("Task1");
-        class1.printName();
+    // Class to simulate file operations
+    public class FileHandler
+    {
+        public void SaveToFile(string fileName, string content)
+        {
+            System.IO.File.WriteAllText(fileName, content);
+            Console.WriteLine($"Content saved to {fileName}");
+        }
 
-        SimpleClass2 class2 = new SimpleClass2();
-        class2.incrementCounter();
-        System.out.println("Counter: " + class2.getCounter());
+        public string ReadFromFile(string fileName)
+        {
+            if (!System.IO.File.Exists(fileName))
+                return "File not found.";
 
-        ComplexClass1 complex1 = new ComplexClass1("Complex1");
-        complex1.addData(5);
-        complex1.addData(10);
-        complex1.printData();
-        System.out.println("Sum: " + complex1.computeSum());
-
-        ComplexClass2 complex2 = new ComplexClass2(true);
-        complex2.addMessage("Message 1");
-        complex2.addMessage("Message 2");
-        complex2.printMessages();
-        System.out.println("Status: " + complex2.getStatus());
-        complex2.toggleStatus();
-        System.out.println("Toggled Status: " + complex2.getStatus());
-
-        ComplexClass3 complex3 = new ComplexClass3("Label1");
-        complex3.setCalculationValue(10);
-        complex3.printLabel();
-        System.out.println("Calculation Result: " + complex3.performCalculation());
+            return System.IO.File.ReadAllText(fileName);
+        }
     }
 
-    // A function doing unrelated tasks
-    public static void runMultipleTasks() {
-        SimpleUtility utility = new SimpleUtility();
-        utility.performTask();
-        System.out.println(utility.getInfo());
+    // Unrelated method to check if a number is prime
+    public static class MathUtils
+    {
+        public static bool IsPrime(int number)
+        {
+            if (number < 2) return false;
 
-        ComplexClass1 class1 = new ComplexClass1("Class1");
-        class1.addData(100);
-        class1.addData(200);
-        class1.printData();
+            for (int i = 2; i <= Math.Sqrt(number); i++)
+            {
+                if (number % i == 0)
+                    return false;
+            }
 
-        ComplexClass2 class2 = new ComplexClass2(false);
-        class2.addMessage("Message A");
-        class2.printMessages();
-        class2.toggleStatus();
-        System.out.println("Status after toggle: " + class2.getStatus());
-
-        ComplexClass3 class3 = new ComplexClass3("Class3");
-        class3.setCalculationValue(50);
-        class3.printLabel();
-        System.out.println("Calculation: " + class3.performCalculation());
+            return true;
+        }
     }
 
-    // Main function performing all tasks and initializing variables
-    public static void main(String[] args) {
-        System.out.println("Program started...");
-        performTask();
-        runMultipleTasks();
+    // Complicated class mixing different functionalities
+    public class MixedHandler
+    {
+        public void HandleUsers(List<User> users)
+        {
+            foreach (var user in users)
+            {
+                Console.WriteLine($"User: {user.Name}, Is Adult: {user.Age >= 18}");
+            }
+        }
 
-        globalMessage = "Completed";
-        totalCounter++;
-        isRunning = true;
+        public void RandomFileTask(string fileName)
+        {
+            var randomContent = RandomUtils.GenerateRandomString(20);
+            var fileHandler = new FileHandler();
+            fileHandler.SaveToFile(fileName, randomContent);
+            Console.WriteLine($"Random content written to {fileName}");
+        }
+    }
 
-        System.out.println("Global Message: " + globalMessage);
-        System.out.println("Total Counter: " + totalCounter);
-        System.out.println("Program Running: " + isRunning);
+    // Entry point
+    public static class Program
+    {
+        public static void Main(string[] args)
+        {
+            var regHandler = new RegistrationHandler();
+            regHandler.RegisterUser("Alice", 25, "alice@example.com");
+            regHandler.RegisterUser("Bob", 17, "invalid-email");
+            regHandler.ListUsers();
+
+            Console.WriteLine("Random String: " + RandomUtils.GenerateRandomString(10));
+            Console.WriteLine("Is 29 prime? " + MathUtils.IsPrime(29));
+
+            var fileHandler = new FileHandler();
+            fileHandler.SaveToFile("example.txt", "Hello, World!");
+            Console.WriteLine(fileHandler.ReadFromFile("example.txt"));
+
+            var mixedHandler = new MixedHandler();
+            mixedHandler.RandomFileTask("random.txt");
+
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadKey();
+        }
     }
 }
 
