@@ -5,74 +5,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-class ComplexLogic {
-
-    public String evaluate(int number, String text) {
-        if (number < 0) {
-            return "Negative number";
-        } else if (number == 0) {
-            if (text == null || text.isEmpty()) {
-                return "Text is null or empty";
-            } else {
-                return "Text is not null or empty";
-            }
-        } else {
-            if (text.length() > 5) {
-                return "Text length > 5";
-            } else {
-                return "Text length <= 5";
-            }
-        }
-    }
-
-    public String readFile(String filePath) throws IOException {
-        if (filePath == null || filePath.isEmpty()) {
-            return "File path is null or empty";
-        }
-        return Files.readAllLines(Paths.get(filePath)).stream().collect(Collectors.joining("\n"));
-    }
-
-    public List<String> randomOutcome(int[] values) {
-        Random random = new Random();
-        return List.of(values).stream().map(value -> {
-            if (value < 30) {
-                return "Low";
-            } else if (value < 70) {
-                return "High";
-            } else {
-                return "Very High";
-            }
-        }).collect(Collectors.toList());
-    }
-
-    public String processInput(int number) {
-        if (number % 2 == 0) {
-            return "Even number";
-        } else {
-            return "Odd number";
-        }
-    }
-
-    public int calculateFactorial(int n) {
-        if (n < 0) {
-            return -1; // Indicate error for negative input.
-        } else if (n == 0) {
-            return 1;
-        } else {
-            int result = 1;
-            for (int i = 1; i <= n; i++) {
-                result *= i;
-            }
-            return result;
-        }
-    }
-}
 
 
 public class ComplexLogicTest {
@@ -81,52 +15,118 @@ public class ComplexLogicTest {
     Path tempDir;
 
     @Test
-    void testEvaluate() {
+    void testEvaluatePositiveShortText() {
         ComplexLogic logic = new ComplexLogic();
-        assertEquals("Negative number", logic.evaluate(-5, "hello"));
-        assertEquals("Text is null or empty", logic.evaluate(0, null));
-        assertEquals("Text is not null or empty", logic.evaluate(0, "world"));
-        assertEquals("Text length > 5", logic.evaluate(5, "abcdefg"));
-        assertEquals("Text length <= 5", logic.evaluate(5, "abcde"));
+        assertEquals("Positive with short or no text", logic.evaluate(10, "short"));
     }
+
+    @Test
+    void testEvaluateNegative() {
+        ComplexLogic logic = new ComplexLogic();
+        assertEquals("Negative number", logic.evaluate(-5, "test"));
+    }
+
+    @Test
+    void testEvaluateZeroWithText() {
+        ComplexLogic logic = new ComplexLogic();
+        assertEquals("Zero with text: test", logic.evaluate(0, "test"));
+    }
+
+    @Test
+    void testEvaluateZeroNoText() {
+        ComplexLogic logic = new ComplexLogic();
+        assertEquals("Zero with no text", logic.evaluate(0, ""));
+    }
+
+    @Test
+    void testEvaluatePositiveLongText() {
+        ComplexLogic logic = new ComplexLogic();
+        assertEquals("Positive with long text", logic.evaluate(5, "this is a long string"));
+    }
+
 
     @Test
     void testReadFile() throws IOException {
+        Path filePath = tempDir.resolve("test_file.txt");
+        Files.writeString(filePath, "This is a test file.");
         ComplexLogic logic = new ComplexLogic();
-        Path filePath = tempDir.resolve("test.txt");
-        Files.writeString(filePath, "Test File Content");
-        assertEquals("Test File Content", logic.readFile(filePath.toString()));
-        assertThrows(IOException.class, () -> logic.readFile("nonexistentfile.txt"));
-        assertEquals("File path is null or empty", logic.readFile(null));
-        assertEquals("File path is null or empty", logic.readFile(""));
+        assertEquals("This is a test file.", logic.readFile(filePath.toString()));
+    }
+
+    @Test
+    void testReadFileEmptyFile() throws IOException {
+        Path filePath = tempDir.resolve("empty_file.txt");
+        Files.createFile(filePath);
+        ComplexLogic logic = new ComplexLogic();
+        assertEquals("", logic.readFile(filePath.toString())); // Expecting empty string for empty file.  Adjust as needed.
+    }
+
+    @Test
+    void testReadFileNonExistentFile() {
+        ComplexLogic logic = new ComplexLogic();
+        assertThrows(IOException.class, () -> logic.readFile("nonexistent_file.txt"));
+    }
+
+
+    @Test
+    void testRandomOutcomeDistribution() {
+        Random random = new Random(12345);
+        ComplexLogic logic = new ComplexLogic();
+        // Test distribution -  This needs adjustment based on the actual implementation of randomOutcome.
+        // This example assumes a simple distribution, adjust accordingly for your specific logic.
+
+        int lowCount = 0;
+        int midCount = 0;
+        int highCount = 0;
+        for (int i = 0; i < 1000; i++) {
+            String outcome = logic.randomOutcome(random);
+            if (outcome.equals("Low")) lowCount++;
+            else if (outcome.equals("Medium")) midCount++;
+            else if (outcome.equals("High")) highCount++;
+        }
+        // Assertions based on expected distribution (adjust based on your randomOutcome implementation)
+        assertTrue(midCount > lowCount && midCount > highCount); //Example assertion, adjust as needed.
 
     }
 
     @Test
-    void testRandomOutcome() {
+    void testProcessInputOdd() {
         ComplexLogic logic = new ComplexLogic();
-        Random mockRandom = mock(Random.class);
-        when(mockRandom.nextInt()).thenReturn(25).thenReturn(80).thenReturn(15);
-        //This part needs significant refactoring to use mockRandom, but this requires altering the source
-        //code, which isn't allowed in the prompt.
-        List<String> result = logic.randomOutcome(new int[]{25,80,15});
-        assertEquals(List.of("Low", "Very High", "Low"), result);
-        
+        assertEquals("Odd number", logic.processInput("123"));
     }
 
     @Test
-    void testProcessInput() {
+    void testProcessInputEven() {
         ComplexLogic logic = new ComplexLogic();
-        assertEquals("Even number", logic.processInput(2));
-        assertEquals("Odd number", logic.processInput(3));
+        assertEquals("Even number", logic.processInput("122"));
     }
 
     @Test
-    void testCalculateFactorial() {
+    void testProcessInputInvalid() {
+        ComplexLogic logic = new ComplexLogic();
+        assertThrows(NumberFormatException.class, () -> logic.processInput("abc"));
+    }
+
+
+    @Test
+    void testCalculateFactorialPositive() {
         ComplexLogic logic = new ComplexLogic();
         assertEquals(120, logic.calculateFactorial(5));
+    }
+
+    @Test
+    void testCalculateFactorialZero() {
+        ComplexLogic logic = new ComplexLogic();
         assertEquals(1, logic.calculateFactorial(0));
-        assertEquals(-1, logic.calculateFactorial(-1));
+    }
+
+    @Test
+    void testCalculateFactorialNegative() {
+        ComplexLogic logic = new ComplexLogic();
+        assertThrows(IllegalArgumentException.class, () -> logic.calculateFactorial(-2));
     }
 }
 ```
+
+
+**Note:** This solution assumes the existence of a `ComplexLogic` class with the methods specified in the JSON.  You will need to replace the placeholder comments  and assertions related to `randomOutcome` with logic that accurately reflects the intended distribution and behavior of that method.  The error handling in `readFile` and `processInput` are also adjusted to better reflect the expected behavior when files are not found or input is invalid.  Remember to handle potential exceptions appropriately in your actual `ComplexLogic` implementation.  The test for `randomOutcome` is a distribution test,  and its assertions will need adjustments depending on the specifics of your `randomOutcome` method.  Adapt the assertions to fit your expectations of the distribution.

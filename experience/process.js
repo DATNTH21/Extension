@@ -36,12 +36,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.genUnittest = void 0;
+exports.improveUnittest = exports.genUnittest = void 0;
 var fa = require("fs");
 var path = require("path");
 var fs_1 = require("fs");
 var geminiResponse_1 = require("./geminiResponse");
 var experiencePre_1 = require("./experiencePre");
+var experiencePost_1 = require("./experiencePost");
 function genUnittest(programminglanguage, framework, source, apiKey) {
     return __awaiter(this, void 0, void 0, function () {
         var getPromptFile, prompt, fileCode, testscope, constructors, auxiliarymethods, chainedmethods, mockingsetup, sourcestructure, input, unittest, filePathOut, err_1;
@@ -49,9 +50,9 @@ function genUnittest(programminglanguage, framework, source, apiKey) {
             switch (_a.label) {
                 case 0:
                     apiKey = 'AIzaSyDXmoUw6_s7FgJiSKKAPcDvJgaLJ1xMVrw'; // Assuming you're getting your API key from an environment variable
-                    getPromptFile = path.join(__dirname, 'prompts/createprompt/genUnittest.txt');
+                    getPromptFile = path.join(__dirname, 'prompts/process/genUnittest.txt');
                     prompt = fa.readFileSync(getPromptFile, 'utf8');
-                    fileCode = path.join(__dirname, 'Input/source.txt');
+                    fileCode = path.join(__dirname, 'Input/sourcecsharp.txt');
                     source = fa.readFileSync(fileCode, 'utf8');
                     return [4 /*yield*/, (0, experiencePre_1.getTestScope)(source, apiKey)];
                 case 1:
@@ -86,7 +87,7 @@ function genUnittest(programminglanguage, framework, source, apiKey) {
                     return [4 /*yield*/, (0, geminiResponse_1.generateResponse)(input, apiKey)];
                 case 8:
                     unittest = _a.sent();
-                    filePathOut = path.join(__dirname, 'Input/unittest.txt');
+                    filePathOut = path.join(__dirname, 'Input/unittestcsharp.txt');
                     return [4 /*yield*/, fs_1.promises.writeFile(filePathOut, unittest, { encoding: 'utf8' })];
                 case 9:
                     _a.sent();
@@ -101,4 +102,51 @@ function genUnittest(programminglanguage, framework, source, apiKey) {
     });
 }
 exports.genUnittest = genUnittest;
-genUnittest('Java', 'JUnit', '', '');
+genUnittest('C#', 'NUnit', '', '');
+function improveUnittest(programminglanguage, framework, source, test, apiKey) {
+    return __awaiter(this, void 0, void 0, function () {
+        var getPromptFile, prompt, fileTest, fileCode, coveragereport, uncovered, input, unittest, filePathOut, err_2;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    apiKey = 'AIzaSyDXmoUw6_s7FgJiSKKAPcDvJgaLJ1xMVrw'; // Assuming you're getting your API key from an environment variable
+                    getPromptFile = path.join(__dirname, 'prompts/process/improveUnittest.txt');
+                    prompt = fa.readFileSync(getPromptFile, 'utf8');
+                    fileTest = path.join(__dirname, 'Input/unittest.txt');
+                    test = fa.readFileSync(fileTest, 'utf8');
+                    fileCode = path.join(__dirname, 'Input/source.txt');
+                    source = fa.readFileSync(fileCode, 'utf8');
+                    return [4 /*yield*/, (0, experiencePost_1.getCoverageReport)(source, test, apiKey)];
+                case 1:
+                    coveragereport = _a.sent();
+                    return [4 /*yield*/, (0, experiencePost_1.checkUncovered)(source, test, apiKey)];
+                case 2:
+                    uncovered = _a.sent();
+                    input = prompt.replace('{programminglanguage}', programminglanguage)
+                        .replace('{framework}', framework)
+                        .replace('{sourcecode}', source)
+                        .replace('{unittest}', test)
+                        .replace('{report}', coveragereport)
+                        .replace('{improvereport}', uncovered);
+                    _a.label = 3;
+                case 3:
+                    _a.trys.push([3, 6, , 7]);
+                    return [4 /*yield*/, (0, geminiResponse_1.generateResponse)(input, apiKey)];
+                case 4:
+                    unittest = _a.sent();
+                    filePathOut = path.join(__dirname, 'Input/improved_unittest.txt');
+                    return [4 /*yield*/, fs_1.promises.writeFile(filePathOut, unittest, { encoding: 'utf8' })];
+                case 5:
+                    _a.sent();
+                    return [2 /*return*/, unittest];
+                case 6:
+                    err_2 = _a.sent();
+                    console.error('Error reading file:', err_2);
+                    throw err_2;
+                case 7: return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.improveUnittest = improveUnittest;
+// improveUnittest('Java','JUnit 5' , '', '', '');

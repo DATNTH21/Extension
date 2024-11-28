@@ -1,7 +1,7 @@
 ```json
 {
   "auxiliary_methods": {
-    "file_io": ["readFile"]
+    "file_system_operations": ["ReadFile"]
   }
 }
 ```

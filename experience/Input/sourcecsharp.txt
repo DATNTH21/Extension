@@ -1,0 +1,205 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+
+namespace DemoWebAPI
+{
+    public class ComplexLogic
+    {
+        // Method with multiple branching and nested conditions
+        public string Evaluate(int number, string text)
+        {
+            if (number < 0)
+            {
+                return "Negative number";
+            }
+            else if (number == 0)
+            {
+                if (string.IsNullOrEmpty(text))
+                {
+                    return "Zero with no text";
+                }
+                else
+                {
+                    return $"Zero with text: {text}";
+                }
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(text) && text.Length > 5)
+                {
+                    return "Positive with long text";
+                }
+                else
+                {
+                    return "Positive with short or no text";
+                }
+            }
+        }
+
+        // Method with external dependency (file reading)
+        private string ReadFile(string filePath)
+        {
+            if (string.IsNullOrEmpty(filePath))
+            {
+                throw new ArgumentException("File path cannot be null or empty");
+            }
+
+            var lines = File.ReadAllLines(filePath);
+            return string.Join("\n", lines);
+        }
+
+        // Method with random behavior
+        public string RandomOutcome()
+        {
+            var random = new Random();
+            int value = random.Next(100);
+
+            if (value < 30)
+            {
+                return "Low";
+            }
+            else if (value < 70)
+            {
+                return "Medium";
+            }
+            else
+            {
+                return "High";
+            }
+        }
+
+        // Method with exception handling and multiple catch blocks
+        public string ProcessInput(string input)
+        {
+            try
+            {
+                int number = int.Parse(input);
+                return number % 2 == 0 ? "Even number" : "Odd number";
+            }
+            catch (FormatException)
+            {
+                return "Invalid number format";
+            }
+            catch (Exception ex)
+            {
+                return $"Unexpected error: {ex.Message}";
+            }
+        }
+
+        // Method with recursion
+        public int CalculateFactorial(int n)
+        {
+            if (n < 0)
+            {
+                throw new ArgumentException("Negative numbers not allowed");
+            }
+            return n == 0 ? 1 : n * CalculateFactorial(n - 1);
+        }
+    }
+}
+system.io
+21120272
+Trương Anh Khoa
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+
+namespace DemoWebAPI
+{
+    public class ComplexLogic
+    {
+        // Method with multiple branching and nested conditions
+        public string Evaluate(int number, string text)
+        {
+            if (number < 0)
+            {
+                return "Negative number";
+            }
+            else if (number == 0)
+            {
+                if (string.IsNullOrEmpty(text))
+                {
+                    return "Zero with no text";
+                }
+                else
+                {
+                    return $"Zero with text: {text}";
+                }
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(text) && text.Length > 5)
+                {
+                    return "Positive with long text";
+                }
+                else
+                {
+                    return "Positive with short or no text";
+                }
+            }
+        }
+
+        // Method with external dependency (file reading)
+        private string ReadFile(string filePath)
+        {
+            if (string.IsNullOrEmpty(filePath))
+            {
+                throw new ArgumentException("File path cannot be null or empty");
+            }
+
+            var lines = File.ReadAllLines(filePath);
+            return string.Join("\n", lines);
+        }
+
+        // Method with random behavior
+        public string RandomOutcome()
+        {
+            var random = new Random();
+            int value = random.Next(100);
+
+            if (value < 30)
+            {
+                return "Low";
+            }
+            else if (value < 70)
+            {
+                return "Medium";
+            }
+            else
+            {
+                return "High";
+            }
+        }
+
+        // Method with exception handling and multiple catch blocks
+        public string ProcessInput(string input)
+        {
+            try
+            {
+                int number = int.Parse(input);
+                return number % 2 == 0 ? "Even number" : "Odd number";
+            }
+            catch (FormatException)
+            {
+                return "Invalid number format";
+            }
+            catch (Exception ex)
+            {
+                return $"Unexpected error: {ex.Message}";
+            }
+        }
+
+        // Method with recursion
+        public int CalculateFactorial(int n)
+        {
+            if (n < 0)
+            {
+                throw new ArgumentException("Negative numbers not allowed");
+            }
+            return n == 0 ? 1 : n * CalculateFactorial(n - 1);
+        }
+    }
+}

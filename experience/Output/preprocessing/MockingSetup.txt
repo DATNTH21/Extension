@@ -1,37 +1,42 @@
 ```json
 {
   "mock_setup": {
-    "file_system": {
-      "test_file_path": "/path/to/test/file.txt",
-      "test_file_content": "This is a test file.\nIt has multiple lines."
+    "fileSystem": {
+      "ReadFile": {
+        "testFilePath": "test_file.txt",
+        "fileContent": "This is a test file.\nIt has multiple lines."
+      }
     },
     "random": {
-      "nextInt_mock": [25, 80, 15] // Example sequence for multiple calls to Random.nextInt
+      "RandomOutcome": {
+        "seed": 12345 
+      }
     }
   },
   "test_input": {
-    "evaluate": {
-      "number": -5,
-      "text": "hello"
+    "Evaluate": {
+      "number": 5,
+      "text": "short"
     },
-    "readFile": {
-      "filePath": "/path/to/test/file.txt"
+    "ReadFile": {
+      "filePath": "test_file.txt"
     },
-    "randomOutcome": [1,2,3],
-    "processInput": {
+    "RandomOutcome": {
+      "input": null
+    },
+    "ProcessInput": {
       "input": "123"
     },
-    "calculateFactorial": {
+    "CalculateFactorial": {
       "n": 5
     }
   },
   "expected_output": {
-    "evaluate": "Negative number",
-    "readFile": "This is a test file.\nIt has multiple lines.",
-    "randomOutcome": ["Low", "High", "Low"],
-    "processInput": "Odd number",
-    "calculateFactorial": 120,
-    "exceptions": []
+    "Evaluate": "Positive with short or no text",
+    "ReadFile": "This is a test file.\nIt has multiple lines.",
+    "RandomOutcome": "Medium", 
+    "ProcessInput": "Odd number",
+    "CalculateFactorial": 120
   }
 }
 ```

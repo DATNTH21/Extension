@@ -2,60 +2,70 @@
 {
   "functions": [
     {
-      "name": "evaluate",
-      "lines": [20, 40],
+      "name": "Evaluate",
+      "lines": [16, 42],
       "branches": [
         {
-          "condition": "number < 0",
-          "cases": ["number is negative"]
+          "condition": "if (number < 0)",
+          "cases": ["number < 0"]
         },
         {
-          "condition": "number == 0",
-          "cases": [
-            "text is null or empty",
-            "text is not null or empty"
-          ]
+          "condition": "else if (number == 0)",
+          "cases": ["number == 0"]
+        },
+        {
+          "condition": "if (string.IsNullOrEmpty(text))",
+          "cases": ["text is null or empty", "text is not null or empty"]
         },
         {
           "condition": "else",
-          "cases": [
-            "text length > 5",
-            "text length <= 5"
-          ]
-        }
-      ]
-    },
-    {
-      "name": "readFile",
-      "lines": [44, 52],
-      "branches": [
-        {
-          "condition": "filePath == null || filePath.isEmpty()",
-          "cases": ["file path is null or empty", "file path is valid"]
-        }
-      ]
-    },
-    {
-      "name": "randomOutcome",
-      "lines": [56, 67],
-      "branches": [
-        {
-          "condition": "value < 30",
-          "cases": ["value is less than 30"]
-        },
-        {
-          "condition": "value < 70",
-          "cases": ["value is between 30 and 69"]
+          "cases": ["number == 0 and text is not null or empty"]
         },
         {
           "condition": "else",
-          "cases": ["value is 70 or greater"]
+          "cases": ["number > 0"]
+        },
+        {
+          "condition": "if (!string.IsNullOrEmpty(text) && text.Length > 5)",
+          "cases": ["text is not null or empty and length > 5", "text is null or empty or length <=5"]
+        },
+        {
+          "condition": "else",
+          "cases": ["number > 0 and (text is null or empty or length <=5)"]
         }
       ]
     },
     {
-      "name": "processInput",
-      "lines": [71, 85],
+      "name": "ReadFile",
+      "lines": [46, 56],
+      "branches": [
+        {
+          "condition": "if (string.IsNullOrEmpty(filePath))",
+          "cases": ["filePath is null or empty", "filePath is not null or empty"]
+        }
+      ]
+    },
+    {
+      "name": "RandomOutcome",
+      "lines": [60, 74],
+      "branches": [
+        {
+          "condition": "if (value < 30)",
+          "cases": ["value < 30", "value >= 30"]
+        },
+        {
+          "condition": "else if (value < 70)",
+          "cases": ["value < 70", "value >= 70"]
+        },
+        {
+          "condition": "else",
+          "cases": ["value >=70"]
+        }
+      ]
+    },
+    {
+      "name": "ProcessInput",
+      "lines": [78, 93],
       "branches": [
         {
           "condition": "number % 2 == 0",
@@ -64,12 +74,16 @@
       ]
     },
     {
-      "name": "calculateFactorial",
-      "lines": [89, 94],
+      "name": "CalculateFactorial",
+      "lines": [97, 105],
       "branches": [
         {
-          "condition": "n < 0",
-          "cases": ["n is negative", "n is non-negative"]
+          "condition": "if (n < 0)",
+          "cases": ["n < 0", "n >=0"]
+        },
+        {
+          "condition": "n == 0",
+          "cases": ["n == 0", "n != 0"]
         }
       ]
     }

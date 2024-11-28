@@ -1,9 +1,9 @@
 ```json
 {
   "test_scope": {
-    "direct_methods": ["evaluate", "randomOutcome", "processInput", "calculateFactorial"],
-    "auxiliary_methods": ["readFile"],
-    "dependencies": ["java.io.IOException", "java.nio.file.Files", "java.nio.file.Paths", "java.util.Random", "java.util.List", "java.util.stream.Collectors"]
+    "direct_methods": ["Evaluate", "RandomOutcome", "ProcessInput", "CalculateFactorial"],
+    "auxiliary_methods": ["ReadFile"],
+    "dependencies": ["System.IO"]
   }
 }
 ```
