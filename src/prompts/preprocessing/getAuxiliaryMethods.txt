@@ -1,0 +1,36 @@
+List all private or utility methods in the class.
+Categorize them based on their functionality (e.g., validation, formatting).
+Return the result in JSON format.
+
+Code Input Example:
+class UserManager:
+    def __init__(self, database, notification_service):
+        self.database = database
+        self.notification_service = notification_service
+
+    def add_user(self, username, email):
+        if not self._is_email_valid(email):
+            raise ValueError("Invalid email")
+        self.database["users"].append({"username": username, "email": email})
+        self.notification_service.send_welcome_email(email)
+
+    def remove_user(self, username):
+        self.database["users"] = [
+            user for user in self.database["users"] if user["username"] != username
+        ]
+
+    def _is_email_valid(self, email):
+        return "@" in email
+
+    def _log_action(self, action, details):
+        print(f"{action}: {details}")
+
+Output Example:
+"auxiliary_methods": {
+"validation": ["_is_email_valid"],
+"logging": ["_log_action"]
+}
+
+Code Input:
+{sourcecode}
+Output?

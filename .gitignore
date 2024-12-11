@@ -30,3 +30,8 @@ coverage/
 # Temporary files
 *.tmp
 *.temp
+
+Data Structures & Algorithms/
+
+.nyc_output/
+CodeTest/

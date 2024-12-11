@@ -1,21 +1,80 @@
 import * as vscode from 'vscode';
-// import { initializeLLM, generateUnitTests, getRecommendedTestingFrameworks, getTestingFrameworks, generateFileName } from './service';
 import * as fs from 'fs/promises';
 import path from 'path';
-import { createTestFile } from './file_utils';
+import { createTestFile } from './utils/file_utils';
 import { initializeLLM } from './setting/extensionSetup';
 import { 
     detectLanguages,
     getCodeReviewResponse, 
     getFrameworkList, 
     splitCodeToFunctions, 
-    // getFunctionTypes, 
-    // getFunctionTypeFocusKeys, 
-    generateTestingCode 
-} from './responseGenerator';
-
+    getProgrammingLanguages,
+    getRecommendFramework
+} from './utils/responseGenerator';
+import {ApiItem, getWebviewContent, updateWebview, saveQueue} from './UI/webcontent'
+import {genUnittest} from './process'
+import {extractCode} from './utils/extractCode'
+import { sleep } from './utils/sleep';
+let apiQueue: ApiItem[] = [];
 
 export function activate(context: vscode.ExtensionContext) {
+    context.subscriptions.push(
+        vscode.commands.registerCommand('configureApis', () => {
+            const panel = vscode.window.createWebviewPanel(
+                'apiQueueManager', // Unique identifier for the webview
+                'LLM API Queue Manager', // Title of the panel
+                vscode.ViewColumn.One, // Editor column to show the new webview
+                { enableScripts: true } // Enable JavaScript in the webview
+            );
+
+            panel.webview.html = getWebviewContent();
+
+            // Restore saved APIs
+            const savedQueue = context.globalState.get<ApiItem[]>('apiQueue', []);
+            apiQueue = [...savedQueue];
+            updateWebview(panel.webview);
+
+            panel.webview.onDidReceiveMessage(
+                (message) => {
+                    switch (message.type) {
+                        case 'addApi':
+                            apiQueue.push({ llmType: message.llmType, apiKey: message.apiKey });
+                            updateWebview(panel.webview);
+                            saveQueue(context);
+                            break;
+
+                        case 'deleteApi':
+                            apiQueue.splice(message.index, 1);
+                            updateWebview(panel.webview);
+                            saveQueue(context);
+                            break;
+
+                        case 'moveUp':
+                            if (message.index > 0) {
+                                [apiQueue[message.index - 1], apiQueue[message.index]] =
+                                    [apiQueue[message.index], apiQueue[message.index - 1]];
+                                updateWebview(panel.webview);
+                                saveQueue(context);
+                            }
+                            break;
+
+                        case 'moveDown':
+                            if (message.index < apiQueue.length - 1) {
+                                [apiQueue[message.index + 1], apiQueue[message.index]] =
+                                    [apiQueue[message.index], apiQueue[message.index + 1]];
+                                updateWebview(panel.webview);
+                                saveQueue(context);
+                            }
+                            break;
+                    }
+                },
+                undefined,
+                context.subscriptions
+            );
+        })
+    );
+
+
     initializeLLM(context);
 
     // Registering the command to generate unit tests for a file
@@ -34,9 +93,9 @@ export function activate(context: vscode.ExtensionContext) {
 
         let selectedLLM = context.workspaceState.get("selectedLLM");
 
-        // if (!selectedLLM) {
-        //     selectedLLM = await showSelectionList(['chatgpt', 'gemini']);
-        // }
+        if (!selectedLLM) {
+            selectedLLM = await showSelectionList(['chatgpt', 'gemini']);
+        }
 
         if (selectedLLM) {
             // context.workspaceState.update("selectedLLM", selectedLLM);
@@ -52,8 +111,8 @@ export function activate(context: vscode.ExtensionContext) {
                     const languages = await detectLanguages(code, apiKeyString);
                     const selectedLanguage = await showSelectionList(languages);
                     if(code_status){
-                        const functions = await splitCodeToFunctions(code, apiKeyString);
-                        vscode.window.showInformationMessage(String(functions));
+                        const classes = await splitCodeToFunctions(code, apiKeyString);
+                        // vscode.window.showInformationMessage(String(functions));
                         const frameworks = await getFrameworkList(String(selectedLanguage), apiKeyString);
                         vscode.window.showInformationMessage(String(frameworks));
                         const selectedFramework = await showSelectionList(frameworks);
@@ -61,24 +120,16 @@ export function activate(context: vscode.ExtensionContext) {
                         // Create a new test file name
                         let unittests: string[] = []; // Use an array to collect unit tests
                         try {
-                            for (const func of functions) {
-                                vscode.window.showInformationMessage(`Function: ${String(func)}`);
-
-                                // const func_types = await getFunctionTypes(String(selectedLanguage), func, apiKeyString);
-                                // vscode.window.showInformationMessage(`Function Types: ${JSON.stringify(func_types)}`);
-
-                                //for (const type of func_types) {
-                                    // const focusKeys = await getFunctionTypeFocusKeys(type, apiKeyString);
-                                    // vscode.window.showInformationMessage(`Focus Keys for type ${type}: ${focusKeys}}`);
-                                    // for (const key of focusKeys) {
-                                const testingCodes = await generateTestingCode(String(selectedLanguage), String(selectedFramework), func, apiKeyString);
-                                unittests.push(...testingCodes); // Ensure testingCodes is defined
+                            // for (const c of classes) {
+                            const testingCodes = await genUnittest(String(selectedLanguage), String(selectedFramework), code, apiKeyString);
+                                
+                                // unittests.push(...testingCodes); // Ensure testingCodes is defined
                                     // }
                                 //}
-                            }
-                            const finalUnitTests = unittests.join('\n');
-                            vscode.window.showInformationMessage(`Unit tests: ${finalUnitTests}`);
-                            
+                            //}
+                            // const finalUnitTests = unittests.join('\n');
+                            // vscode.window.showInformationMessage(`Unit tests: ${testingCodes}`);
+                            const finalUnitTests = extractCode(testingCodes);
                             if (finalUnitTests) {
                                 vscode.window.showInformationMessage(`Unit tests generated and saved`);
                                 createTestFile(filePath, finalUnitTests);
@@ -102,72 +153,73 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    // // Registering the command to generate unit tests for a folder
-    // const genUnitTestFolderCommand = vscode.commands.registerCommand('generateUnitTestFolder', async () => {
-    //     const folderUri = await vscode.window.showOpenDialog({
-    //         canSelectMany: false,ef
-    //         openLabel: 'Select a folder',
-    //         canSelectFolders: true,
-    //     });
+    // Registering the command to generate unit tests for a folder
+    const genUnitTestFolderCommand = vscode.commands.registerCommand('generateUnitTestFolder', async () => {
+        const folderUri = await vscode.window.showOpenDialog({
+            canSelectMany: false,
+            openLabel: 'Select a folder',
+            canSelectFolders: true,
+        });
 
-    //     if (!folderUri || folderUri.length === 0) {
-    //         vscode.window.showErrorMessage("No folder selected.");
-    //         return;
-    //     }
+        if (!folderUri || folderUri.length === 0) {
+            vscode.window.showErrorMessage("No folder selected.");
+            return;
+        }
 
-    //     let selectedLLM = context.workspaceState.get("selectedLLM");
-    //     if (!selectedLLM) {
-    //         selectedLLM = await showSelectionList(['chatgpt', 'gemini']);
-    //     }
+        let selectedLLM = context.workspaceState.get("selectedLLM");
+        if (!selectedLLM) {
+            selectedLLM = await showSelectionList(['chatgpt', 'gemini']);
+        }
 
-    //     if (selectedLLM) {
-    //         context.workspaceState.update("selectedLLM", selectedLLM);
-    //         const apiKey = await getApiKey(context, String(selectedLLM));
-    //         if (apiKey) {
-    //             const folderPath = folderUri[0].fsPath;
-    //             const folderName = path.basename(folderPath); // Get the name of the folder
-    //             const parentFolderPath = path.dirname(folderPath); // Get the parent folder path
-    //             try {
-    //                 const files = await fs.readdir(folderPath);
-    //                 const testFolderPath = path.join(parentFolderPath, `${folderName}_test`); // Create a test folder path
+        if (selectedLLM) {
+            context.workspaceState.update("selectedLLM", selectedLLM);
+            const apiKey = await getApiKey(context, String(selectedLLM));
+            if (apiKey) {
+                const folderPath = folderUri[0].fsPath;
+                const folderName = path.basename(folderPath); // Get the name of the folder
+                const parentFolderPath = path.dirname(folderPath); // Get the parent folder path
+                try {
+                    const files = await fs.readdir(folderPath);
+                    const testFolderPath = path.join(parentFolderPath, `${folderName}_test`); // Create a test folder path
 
-    //                 // Create the test folder if it doesn't exist
-    //                 await fs.mkdir(testFolderPath, { recursive: true });
+                    // Create the test folder if it doesn't exist
+                    await fs.mkdir(testFolderPath, { recursive: true });
 
-    //                 for (const file of files) {
-    //                     const filePath = path.join(folderPath, file);
-    //                     const extension = path.extname(file).slice(1); // Get the extension without the dot
+                    for (const file of files) {
+                        const filePath = path.join(folderPath, file);
+                        const extension = path.extname(file).slice(1); // Get the extension without the dot
 
-    //                     // Only process files (skip directories)
-    //                     const stat = await fs.stat(filePath);
-    //                     if (stat.isFile()) {
-    //                         // Read the file content
-    //                         const content = await fs.readFile(filePath, { encoding: 'utf8' });
-    //                         const framework = await getRecommendedTestingFrameworks(extension, String(apiKey));
+                        // Only process files (skip directories)
+                        const stat = await fs.stat(filePath);
+                        if (stat.isFile()) {
+                            // Read the file content
+                            const content = await fs.readFile(filePath, { encoding: 'utf8' });
+                            const language = await getProgrammingLanguages(extension, String(apiKey));
 
-    //                         if (framework !== 'none') {
-    //                             // Generate unit tests using the selected framework
-    //                             const unitTests = String(await generateUnitTests(framework, content, String(apiKey)));
+                            if (language !== 'none') {
+                                // Generate unit tests using the selected framework
+                                const framework = await getRecommendFramework(language, content, String(apiKey));
+                                const unitTests = String(await genUnittest(language, framework, content, String(apiKey)));
+                                const finalUnitTests = String(extractCode(unitTests));
 
-    //                             // Create a new test file name
-    //                             const testFileName = `${path.basename(file, path.extname(file))}_test.${extension}`; // Change extension as needed
-    //                             const testFilePath = path.join(testFolderPath, testFileName);
-    //                             // Create the test file with the generated unit tests
-    //                             await fs.writeFile(testFilePath, unitTests, { encoding: 'utf8' });
-    //                             vscode.window.showInformationMessage(`Unit tests generated and saved to ${testFilePath}`);
-    //                         } else {
-    //                             vscode.window.showInformationMessage(`No appropriate framework available for ${file}.`);
-    //                         }
-
-    //                     }
-    //                 }
-    //             } catch (err) {
-    //                 const errorMessage = err instanceof Error ? err.message : String(err);
-    //                 vscode.window.showErrorMessage(`Failed to generate unit tests: ${errorMessage}`);
-    //             }
-    //         }
-    //     }
-    // });
+                                // Create a new test file name
+                                const testFileName = `${path.basename(file, path.extname(file))}_test.${extension}`; // Change extension as needed
+                                const testFilePath = path.join(testFolderPath, testFileName);
+                                // Create the test file with the generated unit tests
+                                await fs.writeFile(testFilePath, finalUnitTests, { encoding: 'utf8' });
+                                vscode.window.showInformationMessage(`Unit tests generated and saved to ${testFilePath}`);
+                            } else {
+                                vscode.window.showInformationMessage(`No appropriate framework available for ${file}.`);
+                            }
+                        }
+                    }
+                } catch (err) {
+                    const errorMessage = err instanceof Error ? err.message : String(err);
+                    vscode.window.showErrorMessage(`Failed to generate unit tests: ${errorMessage}`);
+                }
+            }
+        }
+    });
 
     // // Registering the command to generate unit tests for selected code
     // const genUnitTestSelectedCommand = vscode.commands.registerCommand('generateUnitTestSelected', async () => {
@@ -230,22 +282,13 @@ export function activate(context: vscode.ExtensionContext) {
     //     }
     // });
 
-    // Command to reset API key
-    const resetAPICommand = vscode.commands.registerCommand('resetAPI', async () => {
-        let selectedLLM = await showSelectionList(['chatgpt', 'gemini']);
-        let apiKey = await vscode.window.showInputBox({
-            prompt: 'Enter your Gemini API key:',
-            placeHolder: 'API Key'
-        });
-
-        context.workspaceState.update(selectedLLM+ "ApiKey", apiKey);
-    });
+    
 
     context.subscriptions.push(
-    //genUnitTestFolderCommand, 
+    genUnitTestFolderCommand, 
     genUnitTestFileCommand,
-    //genUnitTestSelectedCommand, 
-    resetAPICommand);
+    // genUnitTestSelectedCommand, 
+    );
 }
 
 /**
@@ -283,6 +326,7 @@ async function getApiKey(context: vscode.ExtensionContext, selectedLLM: string) 
     }
     return apiKey;
 }
+
 
 
 // This method is called when your extension is deactivated

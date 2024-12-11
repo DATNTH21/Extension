@@ -1,0 +1,18 @@
+Analyze the provided source code and coverage report to generate improved unit tests. Ensure all uncovered lines, methods, and branches are addressed. Use the specified programming language and testing framework.
+
+Write new test cases or enhance existing ones to achieve 100% line and branch coverage.
+Include mocks, stubs, or parameterized tests where necessary.
+Clearly indicate how each test case improves coverage.
+If specific lines cannot be covered (e.g., platform-dependent code), provide justification and recommendations.
+Return the new or updated test cases in the specified format.
+
+Input Requirements:
+
+Source Code: {source}
+Coverage Report: {report}
+Improve Report: {improvereport}
+Programming Language: {language}
+Framework: {framework}
+Current Unit Tests : {unittest}
+
+Output: complete and optimized unit test class designed to achieve full code coverage for the provided class. The tests cover all lines and branches, ensuring correctness and thoroughness.

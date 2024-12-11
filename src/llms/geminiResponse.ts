@@ -2,6 +2,9 @@ import * as vscode from 'vscode';
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
 import * as dotenv from 'dotenv';
 
+import { retryOn429 } from '../utils/fix429';
+
+
 dotenv.config();
 export async function generateResponse(query: string, apiKey: string): Promise<string> {
     // Google Generative AI configuration
@@ -33,8 +36,16 @@ export async function generateResponse(query: string, apiKey: string): Promise<s
         model: "gemini-1.5-flash", // Use your desired model here
         safetySettings,
     });
+    
+    return retryOn429(async () => {
+        const result = await generativeModel.generateContent(`Question: ${query}`);
+        
+        // Validate response structure
+        if (result?.response?.text) {
+            return result.response.text();
+        } else {
+            throw new Error("Invalid response structure");
+        }
+    });
 
-    // Generate the response
-    const result = await generativeModel.generateContent(`Question: ${query}`);
-    return result.response.text(); // Assuming this returns the response text
 }

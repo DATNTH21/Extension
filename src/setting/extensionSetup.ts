@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as dotenv from 'dotenv';
 
-let generateResponse: (query: string, apiKey: string) => Promise<string>; // Declare the function type
+let generateResponse: (query: string, apiKey: string) => Promise<string>; 
 dotenv.config();
 
 export async function initializeLLM(context: vscode.ExtensionContext) {

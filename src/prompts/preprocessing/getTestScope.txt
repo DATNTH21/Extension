@@ -1,0 +1,33 @@
+Analyze the class and identify:
+The primary method(s) that need direct testing.
+Auxiliary methods that support the class's behavior.
+External dependencies used in the class. Return the result in JSON format.
+
+Code Example Input:
+class UserManager:
+    def __init__(self, database, notification_service):
+        self.database = database
+        self.notification_service = notification_service
+
+    def add_user(self, username, email):
+        if not self._is_email_valid(email):
+            raise ValueError("Invalid email")
+        self.database["users"].append({"username": username, "email": email})
+        self.notification_service.send_welcome_email(email)
+
+    def remove_user(self, username):
+        self.database["users"] = [
+            user for user in self.database["users"] if user["username"] != username
+        ]
+
+
+Output Example:
+"test_scope": {
+  "direct_methods": ["add_user", "remove_user"],
+  "auxiliary_methods": ["get_user"],
+  "dependencies": ["database", "notification_service"]
+}
+
+Code Input:
+{sourcecode}
+Output?

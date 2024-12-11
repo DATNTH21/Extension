@@ -1,0 +1,32 @@
+From the class, identify the constructor and list its parameters. Specify the type of mocks or stubs required for each dependency. Return the result in JSON format.
+
+Code Input Example:
+class UserManager:
+    def __init__(self, database, notification_service):
+        self.database = database
+        self.notification_service = notification_service
+
+    def add_user(self, username, email):
+        if not self._is_email_valid(email):
+            raise ValueError("Invalid email")
+        self.database["users"].append({"username": username, "email": email})
+        self.notification_service.send_welcome_email(email)
+
+    def remove_user(self, username):
+        self.database["users"] = [
+            user for user in self.database["users"] if user["username"] != username
+        ]
+
+    def get_user(self, username):
+        return next((user for user in self.database["users"] if user["username"] == username), None)
+
+Output Example:
+"constructor_dependencies": {
+"database": "MockDatabase",
+"notification_service": "MockNotificationService"
+}
+
+Code Input:
+{sourcecode}
+Output?
+

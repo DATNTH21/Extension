@@ -1,16 +1,30 @@
 {
-  "name": "Extension",
+  "name": "WeTest Extension",
   "version": "0.0.1",
   "lockfileVersion": 3,
   "requires": true,
   "activationEvents": [
-    "onCommand:gemini.generateUnitTest"
+    "onCommand:generateUnitTest"
   ],
-  "description": "A VS Code extension to generate unit tests using the Gemini API.",
-  "displayName": "Gemini Test Generator",
+  "description": "A VS Code extension to generate unit tests using the LLMs.",
+  "displayName": "Test Generator",
   "main": "./dist/extension.js",
   "packages": {},
   "contributes": {
+    "configuration": {
+        "type": "object",
+        "title": "WeTest Extension Settings",
+        "properties": {
+            "WeTest.llmApis": {
+                "type": "object",
+                "default": {
+                    "gemini": "",
+                    "chatgpt": ""
+                },
+                "description": "API keys for different LLMs. Provide keys for the ones you use."
+            }
+        }
+    },
     "commands": [
       {
         "command": "generateUnitTestFolder",
@@ -25,14 +39,15 @@
         "title": "WeTest: Generate Unit Test For Selected Code"
       },
       {
-        "command": "resetAPI",
-        "title": "WeTest: Reset API"
+        "command": "configureApis",
+        "title": "Configure LLM APIs"
       }
     ]
   },
   "devDependencies": {
     "@types/node": "^16.18.3",
     "@types/vscode": "^1.95.0",
+    "nyc": "^17.1.0",
     "typescript": "^4.9.5",
     "vscode": "^1.1.37"
   },
