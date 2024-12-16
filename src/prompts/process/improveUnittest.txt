@@ -14,5 +14,6 @@ Improve Report: {improvereport}
 Programming Language: {language}
 Framework: {framework}
 Current Unit Tests : {unittest}
+Previous error: {error}
 
 Output: complete and optimized unit test class designed to achieve full code coverage for the provided class. The tests cover all lines and branches, ensuring correctness and thoroughness.
