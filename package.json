@@ -3,29 +3,38 @@
   "version": "0.0.1",
   "lockfileVersion": 3,
   "requires": true,
-  "activationEvents": [
-    "onCommand:generateUnitTest"
-  ],
   "description": "A VS Code extension to generate unit tests using the LLMs.",
   "displayName": "Test Generator",
   "main": "./dist/extension.js",
   "packages": {},
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "contributes": {
-    "configuration": {
-            "type": "object",
-            "title": "LLM Extension Configuration",
-            "properties": {
-                "llmExtension.apis": {
-                    "type": "object",
-                    "default": {},
-                    "description": "API keys for different LLM types. Add keys in the format: { 'LLM_Type': 'API_Key' }",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "activityBarContainer",
+          "title": "WeTest Extension",
+          "icon": "media/code-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "activityBarContainer": [
+        {
+          "id": "extension.activityBarIcon",
+          "name": "Toggle Extension",
+          "command": "extension.toggleFeature",
+          "icon": "media/code-icon.svg"
+        }
+      ]
+    },
     "commands": [
+      {
+        "command": "extension.toggleFeature",
+        "title": "Toggle Extension Feature"
+      },
       {
         "command": "generateUnitTestFolder",
         "title": "WeTest: Generate Unit Test For Folder"

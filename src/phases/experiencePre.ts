@@ -1,12 +1,13 @@
 import * as fa from 'fs';
 import * as path from 'path';
 import { promises as fs } from 'fs';
-import { generateResponse } from '../llms/geminiResponse';
-
+// import { generateResponse } from '../llms/geminiResponse';
+import { initializeLLM } from '../setting/extensionSetup';
 import { retryOn429 } from '../utils/fix429';
 
+const generateResponse = initializeLLM();
 // Use the function
-export async function getTestScope(source: string, apiKey: string): Promise<string> {    
+export async function getTestScope(source: string): Promise<string>  {    
     const prompt = `Analyze the class and identify:
                     The primary method(s) that need direct testing.
                     Auxiliary methods that support the class's behavior.
@@ -44,7 +45,7 @@ export async function getTestScope(source: string, apiKey: string): Promise<stri
     var input = prompt.replace('{sourcecode}', source);
     try {
         const result = await retryOn429(async () => {
-            return await generateResponse(input, apiKey);
+            return (await generateResponse)(input);
         });
         return result;
     } catch (err) {
@@ -54,7 +55,7 @@ export async function getTestScope(source: string, apiKey: string): Promise<stri
 
 }            
 
-export async function getConstructors(source: string, apiKey: string): Promise<string> {    
+export async function getConstructors(source: string): Promise<string> {    
     // const getPromptFile = path.join(__dirname, 'prompts/preprocessing/getConstructors.txt');
     const prompt =`From the class, identify the constructor and list its parameters. Specify the type of mocks or stubs required for each dependency. Return the result in JSON format.
 
@@ -92,7 +93,7 @@ export async function getConstructors(source: string, apiKey: string): Promise<s
     var input = prompt.replace('{sourcecode}', source);
     try {
         const result = await retryOn429(async () => {
-            return await generateResponse(input, apiKey);
+            return (await generateResponse)(input);
         });
         return result;
     } catch (err) {
@@ -101,7 +102,7 @@ export async function getConstructors(source: string, apiKey: string): Promise<s
     }
 }            
 
-export async function getAuxiliaryMethods(source: string, apiKey: string): Promise<string> {    
+export async function getAuxiliaryMethods(source: string): Promise<string> {    
     // const getPromptFile = path.join(__dirname, 'prompts/preprocessing/getAuxiliaryMethods.txt');
     const prompt = `List all private or utility methods in the class.
                     Categorize them based on their functionality (e.g., validation, formatting).
@@ -142,7 +143,7 @@ export async function getAuxiliaryMethods(source: string, apiKey: string): Promi
     var input = prompt.replace('{sourcecode}', source);
     try {
         const result = await retryOn429(async () => {
-            return await generateResponse(input, apiKey);
+            return (await generateResponse)(input);
         });
         return result;
     } catch (err) {
@@ -150,7 +151,7 @@ export async function getAuxiliaryMethods(source: string, apiKey: string): Promi
         throw err;
     }
 }           
-export async function getChainToPrivateMethods(source: string, apiKey: string): Promise<string> {    
+export async function getChainToPrivateMethods(source: string): Promise<string> {    
     // const getPromptFile = path.join(__dirname, 'prompts/preprocessing/getChainToPrivateMethods.txt');
     const prompt =`For the public methods in the UserManager class, identify private methods or helper methods that are internally called as part of the implementation. 
                     List these methods and their order of invocation, if applicable. 
@@ -176,16 +177,15 @@ export async function getChainToPrivateMethods(source: string, apiKey: string): 
     var input = prompt.replace('{sourcecode}', source);
     try {
         const result = await retryOn429(async () => {
-            return await generateResponse(input, apiKey);
-        });
-        return result;
+            return (await generateResponse)(input);
+        });        return result;
     } catch (err) {
         console.error('Error: ', err);
         throw err;
     }
 }           
 
-export async function getMockingSetup(source: string, apiKey: string): Promise<string> {
+export async function getMockingSetup(source: string): Promise<string> {
     // const getPromptFile = path.join(__dirname, 'prompts/preprocessing/getMockingSetup.txt');
     const prompt = `Provide a mock setup for the identified dependencies in the constructor and other external services.
                     Specify the expected inputs and outputs for each dependency and the behavior they should mimic during the test. 
@@ -237,7 +237,7 @@ export async function getMockingSetup(source: string, apiKey: string): Promise<s
     var input = prompt.replace('{sourcecode}', source);
     try {
         const result = await retryOn429(async () => {
-            return await generateResponse(input, apiKey);
+            return (await generateResponse)(input);
         });
         return result;
     } catch (err) {
@@ -245,7 +245,7 @@ export async function getMockingSetup(source: string, apiKey: string): Promise<s
         throw err;
     }
 }           
-export async function getCodeStruct(source: string, apiKey: string): Promise<string> {
+export async function getCodeStruct(source: string): Promise<string> {
     // const getCodeCoveragePromptFile = path.join(__dirname, 'prompts/preprocessing/getCodeStruct.txt');
     const prompt = `Analyze the following source code and extract: 
                     1. All functions or methods with their names and line ranges. 
@@ -295,7 +295,7 @@ export async function getCodeStruct(source: string, apiKey: string): Promise<str
     const input = prompt + '\n' + source;
     try {
         const result = await retryOn429(async () => {
-            return await generateResponse(input, apiKey);
+            return (await generateResponse)(input);
         });
         return result;
     } catch (err) {

@@ -4,9 +4,13 @@ import * as dotenv from 'dotenv';
 
 import { retryOn429 } from '../utils/fix429';
 
+const configuration = vscode.workspace.getConfiguration();
+const apis = configuration.get<Record<string, string>>('llmExtension.apis');
 
-dotenv.config();
-export async function generateResponse(query: string, apiKey: string): Promise<string> {
+const apiKey = String(apis?.gemini);
+
+// dotenv.config();
+export async function generateResponse(query: string): Promise<string> {
     // Google Generative AI configuration
     const configuration = new GoogleGenerativeAI(apiKey); // Use non-null assertion since we expect this to be defined
     const modelId = "text-embedding-004";

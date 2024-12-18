@@ -1,0 +1,7 @@
+This is testing code: 
+{code}
+Given a block of code in any programming language, identify and return all lines that involve mocking or stubbing operations. 
+This includes lines where mocking frameworks or libraries (like unittest.mock in Python, Mockito in Java, Sinon in JavaScript, or similar) are used.
+The returned result should be an array containing the relevant lines of code (e.g., ['mocking code line 01', ...]). If no mocking code is found, return an empty array []. 
+The solution should be designed to work across various programming languages and code inputs.
+Do not provide any additional explanation or analysis in the output, just the list of mocking-related lines.

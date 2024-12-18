@@ -1,12 +1,23 @@
+import * as vscode from 'vscode';
+import * as dotenv from 'dotenv';
 import * as fa from 'fs';
 import * as path from 'path';
 import { promises as fs } from 'fs';
-import { generateResponse } from './llms/geminiResponse';
 import { sleep } from './utils/sleep';
-import {getCodeStruct, getTestScope, getConstructors, getAuxiliaryMethods, getChainToPrivateMethods, getMockingSetup}  from './phases/experiencePre';
-import {getTestStruct, getCoverageReport, checkUncovered} from './phases/experiencePost';
+import {
+  getCodeStruct, getTestScope, getConstructors, getAuxiliaryMethods, 
+  getChainToPrivateMethods, getMockingSetup
+} from './phases/experiencePre';
+import { getTestStruct, getCoverageReport, checkUncovered } from './phases/experiencePost';
+import { extractCode } from './utils/extractCode';
+import { initializeLLM } from './setting/extensionSetup';
 
-export async function genUnittest(programminglanguage: string, framework: string, source: string, apiKey: string): Promise<string> {
+// let generateResponse: (query: string) => Promise<string>|undefined;
+
+export async function genUnittest(programminglanguage: string, framework: string, source: string): Promise<string> {
+    // Initialize LLM
+    const generateResponse = await initializeLLM();
+
     const prompt = `Input Parameters:
         Programming Language: {programminglanguage}
         Framework: {framework}
@@ -33,117 +44,173 @@ export async function genUnittest(programminglanguage: string, framework: string
         Ensure high test coverage (close to 100%) for the given source code (test cover functions, branches, conditions, cases in source structure)
 
         Output: Test Code ready run, not include Source code (it is in other file so call from other file).
-        `
+    `;
 
-    // const fileCode = path.join(__dirname, 'Input/sourcecsharp.txt');
-    // source = fa.readFileSync(fileCode, 'utf8');
-    
     // PreProcessing:
-    let testscope: any;
-    let constructors: any;
-    let auxiliarymethods: any;
-    let chainedmethods: any;
-    let mockingsetup: any;
-    let sourcestructure: any;
-    let attempt = 0;
-    let maxRetries=5;
+    let testscope, constructors, auxiliarymethods, chainedmethods, mockingsetup, sourcestructure;
     
     try {
-        testscope = await getTestScope(source, apiKey);
-        console.log("processing..10%");
-        try {
-            constructors = await getConstructors(source, apiKey);
-            console.log("processing..30%");
-            try {
-                auxiliarymethods = await getAuxiliaryMethods(source, apiKey);
-                console.log("processing..50%");
-                try {
-                    chainedmethods = await getChainToPrivateMethods(source, apiKey);
-                    console.log("processing..70%");
-                    try {
-                        mockingsetup = await getMockingSetup(source, apiKey);
-                        console.log("processing..90%");
-                        try {
-                            sourcestructure = await getCodeStruct(source, apiKey);
-                            console.log("processing..98%");
-                        } catch (error) {
-                            console.error("Error in getCodeStruct:", error);
-                        }
-                    } catch (error) {
-                        console.error("Error in getMockingSetup:", error);
-                    }
-                } catch (error) {
-                    console.error("Error in getChainToPrivateMethods:", error);
-                }
-            } catch (error) {
-                console.error("Error in getAuxiliaryMethods:", error);
-            }
-        } catch (error) {
-            console.error("Error in getConstructors:", error);
-        }
+        testscope = await getTestScope(source);
+        console.log("Processing..10%");
+        
+        constructors = await getConstructors(source);
+        console.log("Processing..30%");
+        
+        auxiliarymethods = await getAuxiliaryMethods(source);
+        console.log("Processing..50%");
+        
+        chainedmethods = await getChainToPrivateMethods(source);
+        console.log("Processing..70%");
+        
+        mockingsetup = await getMockingSetup(source);
+        console.log("Processing..90%");
+        
+        sourcestructure = await getCodeStruct(source);
+        console.log("Processing..98%");
+        
     } catch (error) {
-        console.error("Error in getTestScope:", error);
+        console.error("Error during preprocessing:", error);
+        throw error;
     }
-    
-    const input = prompt.replace('{programminglanguage}', programminglanguage)
-    .replace('{framework}', framework)
-    .replace('{sourcecode}', source)
-    .replace('{testscope}', testscope)
-    .replace('{constructors}', constructors)
-    .replace('{auxiliarymethods}', auxiliarymethods)
-    .replace('{chainedmethods}', chainedmethods)
-    .replace('{mockingsetup}', mockingsetup)
-    .replace('{sourcestructure}', sourcestructure);
 
-    try{
-        const unittest = await generateResponse(input, apiKey);
-        console.log("processing..100%");
-        // const filePathOut = path.join(__dirname, 'Input/unittestcsharp.txt');
-        // await fs.writeFile(filePathOut, unittest, { encoding: 'utf8' });
-        return unittest;
-    }                                   
-    catch (err) {
-        console.error('Error reading file:', err);
+    const input = prompt.replace('{programminglanguage}', programminglanguage)
+        .replace('{framework}', framework)
+        .replace('{sourcecode}', source)
+        .replace('{testscope}', testscope)
+        .replace('{constructors}', constructors)
+        .replace('{auxiliarymethods}', auxiliarymethods)
+        .replace('{chainedmethods}', chainedmethods)
+        .replace('{mockingsetup}', mockingsetup)
+        .replace('{sourcestructure}', sourcestructure);
+
+    try {
+        const unittest = await generateResponse(input);
+        console.log("Processing..100%");
+        return String(extractCode(unittest)); // Ensure unittest is a string before extraction
+    } catch (err) {
+        console.error('Error generating unit tests:', err);
         throw err;
     }
-}            
+}
 
-// genUnittest('C#','NUnit' , '', '');
+export async function improveUnittest(programminglanguage: string, framework: string, source: string, test: string): Promise<string> {
+    const generateResponse = await initializeLLM();
 
-export async function improveUnittest(programminglanguage: string, framework: string, source: string, test: string, apiKey: string): Promise<string> {
-    apiKey = 'AIzaSyDXmoUw6_s7FgJiSKKAPcDvJgaLJ1xMVrw'; // Assuming you're getting your API key from an environment variable
-    
     const getPromptFile = path.join(__dirname, 'prompts/process/improveUnittest.txt');
-    const prompt = fa.readFileSync(getPromptFile, 'utf8');
+    const prompt = await fs.readFile(getPromptFile, 'utf8');
 
     const fileTest = path.join(__dirname, 'Input/unittest.txt');
-    test = fa.readFileSync(fileTest, 'utf8');
+    test = await fs.readFile(fileTest, 'utf8');
     
     const fileCode = path.join(__dirname, 'Input/source.txt');
-    source = fa.readFileSync(fileCode, 'utf8');
+    source = await fs.readFile(fileCode, 'utf8');
 
     // PostProcessing:
-    // const teststruct = await getTestStruct(source, test, apiKey);
-    const coveragereport = await getCoverageReport(source, test, apiKey);
-    const uncovered = await checkUncovered(source, test, apiKey);
+    const coveragereport = await getCoverageReport(source, test);
+    const uncovered = await checkUncovered(source, test);
     
     const input = prompt.replace('{programminglanguage}', programminglanguage)
-    .replace('{framework}', framework)
-    .replace('{sourcecode}', source)
-    .replace('{unittest}', test)
-    .replace('{report}', coveragereport)
-    .replace('{improvereport}', uncovered);
+        .replace('{framework}', framework)
+        .replace('{sourcecode}', source)
+        .replace('{unittest}', test)
+        .replace('{report}', coveragereport)
+        .replace('{improvereport}', uncovered);
 
-    try{
-        const unittest = await generateResponse(input, apiKey);
+    try {
+        const unittest = await generateResponse(input);
         const filePathOut = path.join(__dirname, 'Input/improved_unittest.txt');
         await fs.writeFile(filePathOut, unittest, { encoding: 'utf8' });
         return unittest;
+    } catch (err) {
+        console.error('Error improving unit tests:', err);
+        throw err;
+    }
+}
+function extractBracketContent(data: string): string | null {
+    let startIndex = data.indexOf('[');
+    if (startIndex === -1) return null; // No opening bracket found
+
+    let stack: string[] = [];
+    let result = '';
+
+    for (let i = startIndex; i < data.length; i++) {
+        let char = data[i];
+        result += char;
+
+        if (char === '[') {
+            stack.push(char);
+        } else if (char === ']') {
+            stack.pop();
+            if (stack.length === 0) {
+                return result; // Return when all brackets are matched
+            }
+        }
+    }
+
+    return null; // No matching closing bracket found
+}
+
+export async function identifyMocking(testcode: string): Promise<string[]> {
+    const generateResponse = await initializeLLM();
+
+    const prompt = `Prompt:
+    Given a block of code in any programming language, identify and return all lines 
+    that be mocking or stubbing code. This includes lines where mocking frameworks
+    or libraries (like unittest.mock in Python, Mockito in Java, Sinon in JavaScript, or similar) are used and both mocking frameworks import.
+    Do not provide any additional explanation or analysis in the output, just the list of mocking-related lines.
+    The returned result should be a JSON string representing an array containing the relevant lines of code (e.g., ["mocking code line 01", ...]).
+    If no mocking code is found, return an empty array [] as a JSON string.
+
+    ### Example:
+    For the following Python test code:
+
+    python
+    import unittest
+    from unittest.mock import patch, Mock
+
+    class TestExample(unittest.TestCase):
+        @patch('module.ClassName')
+        def test_mocking_example(self, mock_class):
+            mock_class.return_value = Mock()
+            mock_class.return_value.method.return_value = "Mocked method"
+            result = mock_class.return_value.method()
+            self.assertEqual(result, "Mocked method")
+
+
+    The result should be json format:
+
+    [
+        "from unittest.mock import patch, Mock",
+        "@patch('module.ClassName')",
+        "mock_class.return_value = Mock()",
+        "mock_class.return_value.method.return_value = 'Mocked method'"
+    ]
+
+
+    If no mocking code is found, the output should be json format:
+
+    []
+    
+    My Input Code Begin {code} End
+    Output?`;
+    
+    const input = prompt.replace('{code}', testcode);
+    console.log(testcode);
+    try{
+        const Mocking = await generateResponse(input);
+        if(Mocking){
+            console.error('Error reading file:', Mocking);
+        }
+        const match = extractBracketContent(Mocking);
+        if(match){
+            const codeArray: string[] = JSON.parse(match);
+            console.log('Got mocking test', codeArray);
+            return codeArray;
+        }
+        return []
     }                                   
     catch (err) {
         console.error('Error reading file:', err);
         throw err;
     }
 }            
-
-// improveUnittest('Java','JUnit 5' , '', '', '');

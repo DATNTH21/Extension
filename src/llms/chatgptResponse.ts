@@ -2,11 +2,13 @@ import OpenAI from 'openai';
 // import * as dotenv from 'dotenv';
 import * as vscode from 'vscode';
 
-// Load environment variables from .env file
-// dotenv.config();
+const configuration = vscode.workspace.getConfiguration();
+const apis = configuration.get<Record<string, string>>('llmExtension.apis');
+
+const apiKey = String(apis?.gpt);
 
 // Function to generate a response from OpenAI based on a given prompt
-export async function generateResponse(prompt: string, apiKey: string): Promise<string> {
+export async function generateResponse(prompt: string): Promise<string> {
     // Create a new instance of OpenAI with your API key
     const openai = new OpenAI({
         apiKey: apiKey,  // Use your OpenAI API key here

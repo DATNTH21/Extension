@@ -1,33 +1,39 @@
 import * as vscode from 'vscode';
 import * as dotenv from 'dotenv';
 
-let generateResponse: (query: string, apiKey: string) => Promise<string>; 
+let generateResponse: (query: string) => Promise<string>; 
 dotenv.config();
+const configuration = vscode.workspace.getConfiguration();
+const apis = configuration.get<Record<string, string>>('llmExtension.apis');
 
-export async function initializeLLM(context: vscode.ExtensionContext) {
-    const selectedLLM = context.workspaceState.get<string>("selectedLLM");
-    
-    if (selectedLLM === 'chatgpt') {
-        try {
+export async function initializeLLM(): Promise<typeof generateResponse> {
+    let responseMessage = '';
+    const selectedLLM = apis?.llm_active;
+
+    if (!selectedLLM) {
+        vscode.window.showErrorMessage('No LLM selected. Please choose a valid LLM.');
+    }
+
+    try {
+        if (selectedLLM === 'gpt') {
             const chatgptResponse = await import('../llms/chatgptResponse');
             generateResponse = chatgptResponse.generateResponse;
-            vscode.window.showErrorMessage('Loaded ChatGPT module');
-        } catch (err) {
-            console.error('Failed to load ChatGPT module:', err);
-            vscode.window.showErrorMessage('Failed to load ChatGPT module');
-        }
-    } else if (selectedLLM === 'gemini') {
-        try {
+            responseMessage = 'Loaded ChatGPT module';
+            // vscode.window.showInformationMessage(responseMessage);  // Use Information Message for success
+        } 
+        else if (selectedLLM === 'gemini') {
             const geminiResponse = await import('../llms/geminiResponse');
             generateResponse = geminiResponse.generateResponse;
-            vscode.window.showErrorMessage('Failed to load Gemini module');
-        } catch (err) {
-            console.error('Failed to load Gemini module:', err);
-            vscode.window.showErrorMessage('Failed to load Gemini module');
+            responseMessage = 'Loaded Gemini module';
+            // vscode.window.showInformationMessage(responseMessage);  // Use Information Message for success
+        } else {
+            responseMessage = 'No valid LLM selected. Please select either ChatGPT or Gemini.';
+            // vscode.window.showErrorMessage(responseMessage);
         }
-    } else {
-        vscode.window.showErrorMessage('No valid LLM selected. Please select either ChatGPT or Gemini.');
+    } catch (err) {
+        console.error('Failed to load LLM module:', err);
+        vscode.window.showErrorMessage('Failed to load LLM module.');
     }
-    
-}
 
+    return generateResponse;
+}
