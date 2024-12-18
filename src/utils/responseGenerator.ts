@@ -66,3 +66,11 @@ export async function detectLanguages(code: string, apiKey: string): Promise<str
         return response.split(',').map(lang => lang.trim());
     });
 }
+export async function generateFileName(code:string, apiKey:string){
+    const createFilenamePrompt =    `This is the source code: ${code}. Based on this code, suggest a suitable name for the corresponding test file. Notice: only filename, not anything`;
+    return retryOn429(async () => {
+        const response = await generateResponse(createFilenamePrompt, apiKey);
+        return response.split(',').map(lang => lang.trim());
+    });
+
+}

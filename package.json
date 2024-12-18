@@ -12,19 +12,19 @@
   "packages": {},
   "contributes": {
     "configuration": {
-        "type": "object",
-        "title": "WeTest Extension Settings",
-        "properties": {
-            "WeTest.llmApis": {
-                "type": "object",
-                "default": {
-                    "gemini": "",
-                    "chatgpt": ""
-                },
-                "description": "API keys for different LLMs. Provide keys for the ones you use."
+            "type": "object",
+            "title": "LLM Extension Configuration",
+            "properties": {
+                "llmExtension.apis": {
+                    "type": "object",
+                    "default": {},
+                    "description": "API keys for different LLM types. Add keys in the format: { 'LLM_Type': 'API_Key' }",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
             }
-        }
-    },
+        },
     "commands": [
       {
         "command": "generateUnitTestFolder",
@@ -40,7 +40,7 @@
       },
       {
         "command": "configureApis",
-        "title": "Configure LLM APIs"
+        "title": "WeTest: Configure LLM APIs"
       }
     ]
   },

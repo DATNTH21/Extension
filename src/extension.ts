@@ -9,71 +9,41 @@ import {
     getFrameworkList, 
     splitCodeToFunctions, 
     getProgrammingLanguages,
-    getRecommendFramework
+    getRecommendFramework,
+    generateFileName
 } from './utils/responseGenerator';
 import {ApiItem, getWebviewContent, updateWebview, saveQueue} from './UI/webcontent'
 import {genUnittest} from './process'
 import {extractCode} from './utils/extractCode'
-import { sleep } from './utils/sleep';
-let apiQueue: ApiItem[] = [];
+
+const apiKeyString = String("AIzaSyDXmoUw6_s7FgJiSKKAPcDvJgaLJ1xMVrw");
+const configuration = vscode.workspace.getConfiguration();
+const apis = configuration.get<Record<string, string>>('llmExtension.apis');
+vscode.window.showInformationMessage(JSON.stringify(apis, null, 2));
 
 export function activate(context: vscode.ExtensionContext) {
-    context.subscriptions.push(
-        vscode.commands.registerCommand('configureApis', () => {
-            const panel = vscode.window.createWebviewPanel(
-                'apiQueueManager', // Unique identifier for the webview
-                'LLM API Queue Manager', // Title of the panel
-                vscode.ViewColumn.One, // Editor column to show the new webview
-                { enableScripts: true } // Enable JavaScript in the webview
+    const configureApisCmd = vscode.commands.registerCommand('configureApis', async () => {    
+        // Retrieve the existing `llmExtension.apis` settings
+        const existingApis = configuration.get<Record<string, string>>('llmExtension.apis') || {};
+    
+        if (Object.keys(existingApis).length === 0) {
+            // Define default APIs
+            const defaultApis = {
+                "openai": "your-api-key-here",
+                "gemini": "your-api-key-here"
+                };
+    
+            // Update the settings with default values
+            await configuration.update('llmExtension.apis', defaultApis, vscode.ConfigurationTarget.Global);
+    
+            vscode.window.showInformationMessage(
+                "Default API configuration added to settings.json. Edit it as needed."
             );
-
-            panel.webview.html = getWebviewContent();
-
-            // Restore saved APIs
-            const savedQueue = context.globalState.get<ApiItem[]>('apiQueue', []);
-            apiQueue = [...savedQueue];
-            updateWebview(panel.webview);
-
-            panel.webview.onDidReceiveMessage(
-                (message) => {
-                    switch (message.type) {
-                        case 'addApi':
-                            apiQueue.push({ llmType: message.llmType, apiKey: message.apiKey });
-                            updateWebview(panel.webview);
-                            saveQueue(context);
-                            break;
-
-                        case 'deleteApi':
-                            apiQueue.splice(message.index, 1);
-                            updateWebview(panel.webview);
-                            saveQueue(context);
-                            break;
-
-                        case 'moveUp':
-                            if (message.index > 0) {
-                                [apiQueue[message.index - 1], apiQueue[message.index]] =
-                                    [apiQueue[message.index], apiQueue[message.index - 1]];
-                                updateWebview(panel.webview);
-                                saveQueue(context);
-                            }
-                            break;
-
-                        case 'moveDown':
-                            if (message.index < apiQueue.length - 1) {
-                                [apiQueue[message.index + 1], apiQueue[message.index]] =
-                                    [apiQueue[message.index], apiQueue[message.index + 1]];
-                                updateWebview(panel.webview);
-                                saveQueue(context);
-                            }
-                            break;
-                    }
-                },
-                undefined,
-                context.subscriptions
-            );
-        })
-    );
-
+        }
+        // Open the settings.json file
+        await vscode.commands.executeCommand('workbench.action.openSettingsJson');
+    });
+        
 
     initializeLLM(context);
 
@@ -221,70 +191,76 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    // // Registering the command to generate unit tests for selected code
-    // const genUnitTestSelectedCommand = vscode.commands.registerCommand('generateUnitTestSelected', async () => {
-    //     let selectedLLM = context.workspaceState.get("selectedLLM");
-    //     if (!selectedLLM) {
-    //         selectedLLM = await showSelectionList(['chatgpt', 'gemini']);
-    //     }
-    //     if (selectedLLM) {
-    //         context.workspaceState.update("selectedLLM", selectedLLM);
-    //         const apiKey = await getApiKey(context, String(selectedLLM));
-    //         if (apiKey) {
-    //             const editor = vscode.window.activeTextEditor;
-    //             if (editor) {
-    //                 const selection = editor.selection;
-    //                 const selectedText = editor.document.getText(selection);
-    //                 if (selectedText) {
-    //                     // Get the file extension
-    //                     const fileExtension = path.extname(editor.document.fileName).slice(1); // Get the extension without the dot
-    //                     const frameworks: string[] = await getTestingFrameworks(fileExtension, String(apiKey));
-    //                     const selectedFramework = await showSelectionList(frameworks);
+    // Registering the command to generate unit tests for selected code
+    const genUnitTestSelectedCommand = vscode.commands.registerCommand('generateUnitTestSelected', async () => {
+        let selectedLLM = context.workspaceState.get("selectedLLM");
+        if (!selectedLLM) {
+            selectedLLM = await showSelectionList(['chatgpt', 'gemini']);
+        }
+        if (selectedLLM) {
+            context.workspaceState.update("selectedLLM", selectedLLM);
+            const apiKey = await getApiKey(context, String(selectedLLM));
+            if (apiKey) {
+                const editor = vscode.window.activeTextEditor;
+                if (editor) {
+                    const selection = editor.selection;
+                    const selectedText = editor.document.getText(selection);
+                    if (selectedText) {
+                        // Get the file extension
+                        const fileExtension = path.extname(editor.document.fileName).slice(1); // Get the extension without the dot
+                        const languages = await detectLanguages(selectedText, apiKeyString);
+                        const selectedLanguage = await showSelectionList(languages);
+    
+                        const frameworks = await getFrameworkList(String(selectedLanguage), apiKeyString);
+                        vscode.window.showInformationMessage(String(frameworks));
+                        const selectedFramework = await showSelectionList(frameworks);
 
-    //                     if (selectedFramework !== 'none') {
-    //                         vscode.window.showInformationMessage(`You selected: ${selectedFramework}`);
+                        if (selectedFramework !== 'none') {
+                            // vscode.window.showInformationMessage(`You selected: ${selectedFramework}`);
 
-    //                         // Generate unit tests using the selected framework
-    //                         const unitTests = String(await generateUnitTests(String(selectedFramework), selectedText, String(apiKey)));
-    //                         // Create a new test file name
-    //                         const testFileName = String(await generateFileName(selectedText, String(apiKey)));
+                            // Generate unit tests using the selected framework
+                            const unitTests = await genUnittest(String(selectedLanguage), String(selectedFramework), selectedText, apiKeyString);
 
-    //                         // Create the test file with the generated unit tests
-    //                         vscode.window.showInformationMessage(`Unit tests generated and saved to ${testFileName}`);
+                            // Create a new test file name
+                            const testFileName = String(await generateFileName(selectedText, String(apiKey)));
+
+                            // Create the test file with the generated unit tests
+                            vscode.window.showInformationMessage(`Unit tests generated and saved to ${testFileName}`);
                             
-    //                         // Get the full path of the currently opened file
-    //                         const filePath = editor.document.uri.fsPath;
-    //                         const fileName = testFileName.replace(/\s+/g, '');
-    //                         // Use path.dirname to get the directory path
-    //                         const directoryPath = path.dirname(filePath);
-    //                         // Create the full path for the test file
-    //                         const testFilePath = vscode.Uri.file(path.join(directoryPath, fileName));
-    //                         try {
-    //                             await fs.writeFile(testFilePath.fsPath, unitTests, { encoding: 'utf8' });
-    //                             await vscode.workspace.fs.writeFile(testFilePath, Buffer.from(unitTests, 'utf8'));
-    //                             vscode.window.showInformationMessage(`Test file created: ${fileName}`);
-    //                         }catch (err) {
-    //                         const errorMessage = (err as Error).message;
-    //                         console.error(`Error creating test file: ${errorMessage}`); // Log the error to the console
-    //                         vscode.window.showErrorMessage(`Failed to create test file: ${errorMessage}`);
-    //                     }
-    //                 }
-    //                      else {
-    //                         vscode.window.showInformationMessage('No appropriate framework available for this code.');
-    //                     }
-    //                 } else {
-    //                     vscode.window.showInformationMessage('No code selected for unit test generation.');
-    //                 }
-    //             } else {
-    //                 vscode.window.showInformationMessage('No active editor.');
-    //             }
-    //         }
-    //     }
-    // });
+                            // Get the full path of the currently opened file
+                            const filePath = editor.document.uri.fsPath;
+                            const fileName = testFileName.replace(/\s+/g, '');
+                            // Use path.dirname to get the directory path
+                            const directoryPath = path.dirname(filePath);
+                            // Create the full path for the test file
+                            const testFilePath = vscode.Uri.file(path.join(directoryPath, fileName));
+                            try {
+                                await fs.writeFile(testFilePath.fsPath, unitTests, { encoding: 'utf8' });
+                                await vscode.workspace.fs.writeFile(testFilePath, Buffer.from(unitTests, 'utf8'));
+                                vscode.window.showInformationMessage(`Test file created: ${fileName}`);
+                            }catch (err) {
+                            const errorMessage = (err as Error).message;
+                            console.error(`Error creating test file: ${errorMessage}`); // Log the error to the console
+                            vscode.window.showErrorMessage(`Failed to create test file: ${errorMessage}`);
+                        }
+                    }
+                         else {
+                            vscode.window.showInformationMessage('No appropriate framework available for this code.');
+                        }
+                    } else {
+                        vscode.window.showInformationMessage('No code selected for unit test generation.');
+                    }
+                } else {
+                    vscode.window.showInformationMessage('No active editor.');
+                }
+            }
+        }
+    });
 
     
 
     context.subscriptions.push(
+    configureApisCmd,
     genUnitTestFolderCommand, 
     genUnitTestFileCommand,
     // genUnitTestSelectedCommand, 

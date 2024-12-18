@@ -1,4 +1,4 @@
-const maxRetries = 3;
+const maxRetries = 5;
 const initialDelay = 1000;
 
 export async function retryOn429<T>(fn: () => Promise<T>): Promise<T> {
