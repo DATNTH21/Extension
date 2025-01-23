@@ -7,3 +7,16 @@ Ctrl + Shift + P
 > WeTest: Generate Unit Test For File
 > WeTest: Generate Unit Test For Selected Code
 > WeTest: Reset API
+
+***
+> WeTest: Configure LLM APIs
+auto open setting.json
+find "llmExtension.apis", in "llmExtension.apis":
+"llm_active": name of llm ("gpt","gemini")
+"gpt": apikey of gpt
+"gemini": apikey of gemini
+
+***
+There is "Highlight Mock" Button on Status Bar
+Click "Highlight Mock" -> highlight code is mocking code -> "Disable Highlight" -> disable
+-> "Highlight Mock"

@@ -13,10 +13,11 @@ import {
     generateFileName
 } from './utils/responseGenerator';
 import { highlightCodeFunc, disableHighlight} from './utils/highlight';
-import {showSelectionList} from './utils/showselection'
+import {showSelectionList} from './utils/showselection';
+import { getFolderTree } from './utils/getFolderTree';
 
-import {genUnittest, identifyMocking} from './process'
-
+import {genUnittest, identifyMocking} from './phases/unittest/unitProcess'
+import { genApitest } from './phases/apitest/apiProcess';
 
 const configuration = vscode.workspace.getConfiguration();
 const apis = configuration.get<Record<string, string>>('llmExtension.apis');
@@ -165,6 +166,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         const folderPath = folderUri[0].fsPath;
+
         const folderName = path.basename(folderPath); // Get the name of the folder
         const parentFolderPath = path.dirname(folderPath); // Get the parent folder path
         try {
@@ -265,12 +267,66 @@ export function activate(context: vscode.ExtensionContext) {
            
     });
 
+    const genApiTestFileCommand = vscode.commands.registerCommand('generateApiTestFile', async () => {
+        const uri = await vscode.window.showOpenDialog({
+            canSelectMany: false,
+            filters: {
+                'All Files': ['*'],
+            },
+        });
 
+        if (!uri || uri.length === 0) {
+            vscode.window.showErrorMessage("No file selected.");
+            return;
+        }
+
+        const fileUri = uri[0];
+        const filePath = fileUri.fsPath;
+        try {
+            const code = await fs.readFile(filePath, { encoding: 'utf8' });
+
+            const code_status = await getCodeReviewResponse(code);
+            const languages = await detectLanguages(code);
+            const classes = await splitCodeToFunctions(code);
+            
+            const selectedLanguage = await showSelectionList(languages);
+            const frameworks = await getFrameworkList(String(selectedLanguage));
+
+            const selectedFramework = await showSelectionList(frameworks);
+
+            // Create a new test file name
+            // let unittests: string[] = []; // Use an array to collect unit tests
+            try {
+                // for (const c of classes) {
+                    const testingCodes = await genApitest(String(selectedLanguage), String(selectedFramework), code);
+                        
+                    if (testingCodes) {
+                        // unittests.push(testingCodes)
+                        createTestFile(filePath,testingCodes );
+                        vscode.window.showInformationMessage(`Unit tests generated and saved`);
+                    } else {
+                        vscode.window.showErrorMessage('No unit tests were generated.');
+                    }
+            //}
+            // const rawunittest = unittests.join('\n');
+
+            }
+            catch (error) {
+                vscode.window.showErrorMessage(`An error occurred: ${String(error)}`);
+            }
+
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : String(err);
+            vscode.window.showErrorMessage(`Failed to generate unit tests: ${errorMessage}`);
+        }
+            
+    });
     context.subscriptions.push(
         configureApisCmd,
         genUnitTestFolderCommand, 
         genUnitTestFileCommand,
         genUnitTestSelectedCommand, 
+        genApiTestFileCommand
     );
 }
 

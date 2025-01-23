@@ -1,205 +1,78 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using QuanLySach.Data;
+using QuanLySach.Models;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
-namespace DemoWebAPI
+namespace QuanLySach.Controllers
 {
-    public class ComplexLogic
+    [Route("api/[controller]")]
+    [ApiController]
+    public class BooksController : ControllerBase
     {
-        // Method with multiple branching and nested conditions
-        public string Evaluate(int number, string text)
+        private readonly AppDbContext _context;
+
+        public BooksController(AppDbContext context)
         {
-            if (number < 0)
-            {
-                return "Negative number";
-            }
-            else if (number == 0)
-            {
-                if (string.IsNullOrEmpty(text))
-                {
-                    return "Zero with no text";
-                }
-                else
-                {
-                    return $"Zero with text: {text}";
-                }
-            }
-            else
-            {
-                if (!string.IsNullOrEmpty(text) && text.Length > 5)
-                {
-                    return "Positive with long text";
-                }
-                else
-                {
-                    return "Positive with short or no text";
-                }
-            }
+            _context = context;
         }
 
-        // Method with external dependency (file reading)
-        private string ReadFile(string filePath)
+        // GET: api/books
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Book>>> GetBooks()
         {
-            if (string.IsNullOrEmpty(filePath))
-            {
-                throw new ArgumentException("File path cannot be null or empty");
-            }
-
-            var lines = File.ReadAllLines(filePath);
-            return string.Join("\n", lines);
+            return await _context.Books.ToListAsync();
         }
 
-        // Method with random behavior
-        public string RandomOutcome()
+        // GET: api/books/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Book>> GetBook(int id)
         {
-            var random = new Random();
-            int value = random.Next(100);
-
-            if (value < 30)
+            var book = await _context.Books.FindAsync(id);
+            if (book == null)
             {
-                return "Low";
+                return NotFound();
             }
-            else if (value < 70)
-            {
-                return "Medium";
-            }
-            else
-            {
-                return "High";
-            }
+            return book;
         }
 
-        // Method with exception handling and multiple catch blocks
-        public string ProcessInput(string input)
+        // POST: api/books
+        [HttpPost]
+        public async Task<ActionResult<Book>> PostBook(Book book)
         {
-            try
-            {
-                int number = int.Parse(input);
-                return number % 2 == 0 ? "Even number" : "Odd number";
-            }
-            catch (FormatException)
-            {
-                return "Invalid number format";
-            }
-            catch (Exception ex)
-            {
-                return $"Unexpected error: {ex.Message}";
-            }
+            _context.Books.Add(book);
+            await _context.SaveChangesAsync();
+            return CreatedAtAction(nameof(GetBook), new { id = book.Id }, book);
         }
 
-        // Method with recursion
-        public int CalculateFactorial(int n)
+        // PUT: api/books/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutBook(int id, Book book)
         {
-            if (n < 0)
+            if (id != book.Id)
             {
-                throw new ArgumentException("Negative numbers not allowed");
+                return BadRequest();
             }
-            return n == 0 ? 1 : n * CalculateFactorial(n - 1);
-        }
-    }
-}
-system.io
-21120272
-Trương Anh Khoa
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
-namespace DemoWebAPI
-{
-    public class ComplexLogic
-    {
-        // Method with multiple branching and nested conditions
-        public string Evaluate(int number, string text)
-        {
-            if (number < 0)
-            {
-                return "Negative number";
-            }
-            else if (number == 0)
-            {
-                if (string.IsNullOrEmpty(text))
-                {
-                    return "Zero with no text";
-                }
-                else
-                {
-                    return $"Zero with text: {text}";
-                }
-            }
-            else
-            {
-                if (!string.IsNullOrEmpty(text) && text.Length > 5)
-                {
-                    return "Positive with long text";
-                }
-                else
-                {
-                    return "Positive with short or no text";
-                }
-            }
+            _context.Entry(book).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return NoContent();
         }
 
-        // Method with external dependency (file reading)
-        private string ReadFile(string filePath)
+        // DELETE: api/books/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteBook(int id)
         {
-            if (string.IsNullOrEmpty(filePath))
+            var book = await _context.Books.FindAsync(id);
+            if (book == null)
             {
-                throw new ArgumentException("File path cannot be null or empty");
+                return NotFound();
             }
-
-            var lines = File.ReadAllLines(filePath);
-            return string.Join("\n", lines);
-        }
-
-        // Method with random behavior
-        public string RandomOutcome()
-        {
-            var random = new Random();
-            int value = random.Next(100);
-
-            if (value < 30)
-            {
-                return "Low";
-            }
-            else if (value < 70)
-            {
-                return "Medium";
-            }
-            else
-            {
-                return "High";
-            }
-        }
-
-        // Method with exception handling and multiple catch blocks
-        public string ProcessInput(string input)
-        {
-            try
-            {
-                int number = int.Parse(input);
-                return number % 2 == 0 ? "Even number" : "Odd number";
-            }
-            catch (FormatException)
-            {
-                return "Invalid number format";
-            }
-            catch (Exception ex)
-            {
-                return $"Unexpected error: {ex.Message}";
-            }
-        }
-
-        // Method with recursion
-        public int CalculateFactorial(int n)
-        {
-            if (n < 0)
-            {
-                throw new ArgumentException("Negative numbers not allowed");
-            }
-            return n == 0 ? 1 : n * CalculateFactorial(n - 1);
+            _context.Books.Remove(book);
+            await _context.SaveChangesAsync();
+            return NoContent();
         }
     }
 }

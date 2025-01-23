@@ -2,8 +2,8 @@ import * as fa from 'fs';
 import * as path from 'path';
 import { promises as fs } from 'fs';
 // import { generateResponse } from '../llms/geminiResponse';
-import { initializeLLM } from '../setting/extensionSetup';
-import { retryOn429 } from '../utils/fix429';
+import { initializeLLM } from '../../setting/extensionSetup';
+import { retryOn429 } from '../../utils/fix429';
 
 const generateResponse = initializeLLM();
 // Use the function

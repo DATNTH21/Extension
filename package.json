@@ -44,6 +44,10 @@
         "title": "WeTest: Generate Unit Test For File"
       },
       {
+        "command": "generateApiTestFile",
+        "title": "WeTest: Generate API Test For File"
+      },
+      {
         "command": "generateUnitTestSelected",
         "title": "WeTest: Generate Unit Test For Selected Code"
       },

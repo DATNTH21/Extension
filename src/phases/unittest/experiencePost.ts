@@ -1,10 +1,8 @@
 import * as fa from 'fs';
 import * as path from 'path';
 import { promises as fs } from 'fs';
-import { initializeLLM } from '../setting/extensionSetup';
+import { initializeLLM } from '../../setting/extensionSetup';
 import { getCodeStruct } from './experiencePre';
-
-
 
 
 export async function getTestStruct(source: string, test: string): Promise<string> {    

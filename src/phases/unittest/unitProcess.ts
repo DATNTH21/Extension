@@ -3,21 +3,18 @@ import * as dotenv from 'dotenv';
 import * as fa from 'fs';
 import * as path from 'path';
 import { promises as fs } from 'fs';
-import { sleep } from './utils/sleep';
+import { sleep } from '../../utils/sleep';
 import {
   getCodeStruct, getTestScope, getConstructors, getAuxiliaryMethods, 
   getChainToPrivateMethods, getMockingSetup
-} from './phases/experiencePre';
-import { getTestStruct, getCoverageReport, checkUncovered } from './phases/experiencePost';
-import { extractCode } from './utils/extractCode';
-import { initializeLLM } from './setting/extensionSetup';
+} from './experiencePre';
+import { getTestStruct, getCoverageReport, checkUncovered } from './experiencePost';
+import { extractCode } from '../../utils/extractCode';
+import { initializeLLM } from '../../setting/extensionSetup';
 
-// let generateResponse: (query: string) => Promise<string>|undefined;
+const generateResponse = initializeLLM();
 
 export async function genUnittest(programminglanguage: string, framework: string, source: string): Promise<string> {
-    // Initialize LLM
-    const generateResponse = await initializeLLM();
-
     const prompt = `Input Parameters:
         Programming Language: {programminglanguage}
         Framework: {framework}
@@ -51,22 +48,22 @@ export async function genUnittest(programminglanguage: string, framework: string
     
     try {
         testscope = await getTestScope(source);
-        console.log("Processing..10%");
+        console.log("Got testscope");
         
         constructors = await getConstructors(source);
-        console.log("Processing..30%");
+        console.log("Got constructors");
         
         auxiliarymethods = await getAuxiliaryMethods(source);
-        console.log("Processing..50%");
+        console.log("Got auxiliarymethods");
         
         chainedmethods = await getChainToPrivateMethods(source);
-        console.log("Processing..70%");
+        console.log("Got chainedmethods");
         
         mockingsetup = await getMockingSetup(source);
-        console.log("Processing..90%");
+        console.log("Got mockingsetup");
         
         sourcestructure = await getCodeStruct(source);
-        console.log("Processing..98%");
+        console.log("Got sourcestructure");
         
     } catch (error) {
         console.error("Error during preprocessing:", error);
@@ -84,9 +81,9 @@ export async function genUnittest(programminglanguage: string, framework: string
         .replace('{sourcestructure}', sourcestructure);
 
     try {
-        const unittest = await generateResponse(input);
-        console.log("Processing..100%");
-        return String(extractCode(unittest)); // Ensure unittest is a string before extraction
+        const unittest = (await generateResponse)(input);
+        console.log("Generated unittest");
+        return String(extractCode(await unittest)); // Ensure unittest is a string before extraction
     } catch (err) {
         console.error('Error generating unit tests:', err);
         throw err;
@@ -94,7 +91,6 @@ export async function genUnittest(programminglanguage: string, framework: string
 }
 
 export async function improveUnittest(programminglanguage: string, framework: string, source: string, test: string): Promise<string> {
-    const generateResponse = await initializeLLM();
 
     const getPromptFile = path.join(__dirname, 'prompts/process/improveUnittest.txt');
     const prompt = await fs.readFile(getPromptFile, 'utf8');
@@ -117,7 +113,7 @@ export async function improveUnittest(programminglanguage: string, framework: st
         .replace('{improvereport}', uncovered);
 
     try {
-        const unittest = await generateResponse(input);
+        const unittest = await (await generateResponse)(input);
         const filePathOut = path.join(__dirname, 'Input/improved_unittest.txt');
         await fs.writeFile(filePathOut, unittest, { encoding: 'utf8' });
         return unittest;
@@ -151,7 +147,6 @@ function extractBracketContent(data: string): string | null {
 }
 
 export async function identifyMocking(testcode: string): Promise<string[]> {
-    const generateResponse = await initializeLLM();
 
     const prompt = `Prompt:
     Given a block of code in any programming language, identify and return all lines 
@@ -197,7 +192,7 @@ export async function identifyMocking(testcode: string): Promise<string[]> {
     const input = prompt.replace('{code}', testcode);
     console.log(testcode);
     try{
-        const Mocking = await generateResponse(input);
+        const Mocking = await (await generateResponse)(input);
         if(Mocking){
             console.error('Error reading file:', Mocking);
         }

@@ -1,0 +1,73 @@
+```json
+{
+  "apis": [
+    {
+      "method": "GET",
+      "url": "/api/books",
+      "headers": null,
+      "request_body": null,
+      "response": [
+        {
+          "Id": 0, 
+          "Title": "string",
+          "Author": "string",
+          "PublishedYear": 0
+        }
+      ],
+      "description": "Retrieves a list of all books."
+    },
+    {
+      "method": "GET",
+      "url": "/api/books/{id}",
+      "headers": null,
+      "request_body": null,
+      "response": {
+          "Id": 0, 
+          "Title": "string",
+          "Author": "string",
+          "PublishedYear": 0
+        },
+      "description": "Retrieves a specific book by ID."
+    },
+    {
+      "method": "POST",
+      "url": "/api/books",
+      "headers": null,
+      "request_body": {
+          "Id": 0, 
+          "Title": "string",
+          "Author": "string",
+          "PublishedYear": 0
+        },
+      "response": {
+          "Id": 0, 
+          "Title": "string",
+          "Author": "string",
+          "PublishedYear": 0
+        },
+      "description": "Creates a new book."
+    },
+    {
+      "method": "PUT",
+      "url": "/api/books/{id}",
+      "headers": null,
+      "request_body": {
+          "Id": 0, 
+          "Title": "string",
+          "Author": "string",
+          "PublishedYear": 0
+        },
+      "response": null,
+      "description": "Updates a specific book by ID."
+    },
+    {
+      "method": "DELETE",
+      "url": "/api/books/{id}",
+      "headers": null,
+      "request_body": null,
+      "response": null,
+      "description": "Deletes a specific book by ID."
+    }
+  ]
+}
+```
