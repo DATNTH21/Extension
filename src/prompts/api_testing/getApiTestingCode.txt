@@ -1,0 +1,11 @@
+Generate a unit test for all API endpoints in {LANGUAGE} using the testing framework: {framework}.
+The test should not call the real API but should use mocking to simulate API behavior. The test should:
+Create a mock request to the API endpoint.
+Use a mock server or a suitable mocking mechanism to handle the request.
+Ensure the API handler processes the request and returns a response.
+Assert that the response contains the expected status code (e.g., 200 OK), all cases: wrong and right.
+Decode and verify the response body matches mock data.
+Validate specific fields in the response.
+Based on the following code:
+{Code}
+Noted: Output only be ready run code if explain anything, comment following programming language code.

@@ -1,0 +1,75 @@
+Given the following API endpoint and folder tree, identify and list the relevant files that handle the API in the project.
+
+### Input Example:
+
+- **API Endpoint List**:  
+  [
+    {
+      "method": "GET",
+      "path": "/api/Account",
+      "handler_function": "Get"
+    },
+    {
+      "method": "GET",
+      "path": "/api/Account/{MaNV}",
+      "handler_function": "Get"
+    },
+    {
+      "method": "POST",
+      "path": "/api/Account",
+      "handler_function": "Post"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/Account/{MaNV}/{SoTaiKhoan}",
+      "handler_function": "Patch"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/Account/{MaNV}/{SoTaiKhoan}",
+      "handler_function": "Delete"
+    }
+  ]
+
+- **Folder Tree** (from the root directory):
+```
+C:.
+│   .gitignore
+│   appsettings.Development.json
+│   appsettings.json
+│   Database.sql
+│   HRMSystem.csproj
+│   Program.cs
+│   Startup.cs
+│
+├───Controllers
+│       AccountController.cs
+│       ActivityController.cs
+│       EmployeeController.cs
+│
+├───Services
+│       AccountService.cs
+│       IAccountService.cs
+│       UserService.cs
+│
+├───Models
+│       Account.cs
+│       Employee.cs
+│
+└───Data
+        EmployeeContext.cs
+```
+
+### Task:
+1. Identify the files in the `Controllers` folder that handles the APIs.
+2. Identify the service files in the `Services` folder that handles the business logic for this APIs.
+3. Identify the model files in the `Models` folder related to the `Account` data.
+
+### Output Example:
+Controllers/AccountController.cs,Services/AccountService.cs,Models/Account.cs
+
+With Input:
+**API Endpoint List**: {API}
+**Folder Tree**: {Tree}
+
+Output? (Return format like Above Output Example, not explain anything)

@@ -9,8 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
-    return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
@@ -35,13 +35,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTestScope = getTestScope;
-exports.getConstructors = getConstructors;
-exports.getAuxiliaryMethods = getAuxiliaryMethods;
-exports.getChainToPrivateMethods = getChainToPrivateMethods;
-exports.getMockingSetup = getMockingSetup;
-exports.getCodeStruct = getCodeStruct;
+exports.__esModule = true;
+exports.getCodeStruct = exports.getMockingSetup = exports.getChainToPrivateMethods = exports.getAuxiliaryMethods = exports.getConstructors = exports.getTestScope = void 0;
 var fa = require("fs");
 var path = require("path");
 var fs_1 = require("fs");
@@ -76,6 +71,7 @@ function getTestScope(source, apiKey) {
         });
     });
 }
+exports.getTestScope = getTestScope;
 function getConstructors(source, apiKey) {
     return __awaiter(this, void 0, void 0, function () {
         var getPromptFile, prompt, input, result, filePathOut, err_2;
@@ -105,6 +101,7 @@ function getConstructors(source, apiKey) {
         });
     });
 }
+exports.getConstructors = getConstructors;
 function getAuxiliaryMethods(source, apiKey) {
     return __awaiter(this, void 0, void 0, function () {
         var getPromptFile, prompt, input, result, filePathOut, err_3;
@@ -134,6 +131,7 @@ function getAuxiliaryMethods(source, apiKey) {
         });
     });
 }
+exports.getAuxiliaryMethods = getAuxiliaryMethods;
 function getChainToPrivateMethods(source, apiKey) {
     return __awaiter(this, void 0, void 0, function () {
         var getPromptFile, prompt, input, result, filePathOut, err_4;
@@ -163,6 +161,7 @@ function getChainToPrivateMethods(source, apiKey) {
         });
     });
 }
+exports.getChainToPrivateMethods = getChainToPrivateMethods;
 function getMockingSetup(source, apiKey) {
     return __awaiter(this, void 0, void 0, function () {
         var getPromptFile, prompt, input, result, filePathOut, err_5;
@@ -192,6 +191,7 @@ function getMockingSetup(source, apiKey) {
         });
     });
 }
+exports.getMockingSetup = getMockingSetup;
 function getCodeStruct(source, apiKey) {
     return __awaiter(this, void 0, void 0, function () {
         var getCodeCoveragePromptFile, prompt, input, result, filePathOut, err_6;
@@ -221,6 +221,7 @@ function getCodeStruct(source, apiKey) {
         });
     });
 }
+exports.getCodeStruct = getCodeStruct;
 // const testscope = getTestScope('','');
 // const constructors = getConstructors('','');
 // const auxiliarymethods = getAuxiliaryMethods('','');

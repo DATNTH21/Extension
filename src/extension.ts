@@ -16,8 +16,13 @@ import { highlightCodeFunc, disableHighlight} from './utils/highlight';
 import {showSelectionList} from './utils/showselection';
 import { getFolderTree } from './utils/getFolderTree';
 
+import { getTree } from './utils/getTree';
+
 import {genUnittest, identifyMocking} from './phases/unittest/unitProcess'
 import { genApitest } from './phases/apitest/apiProcess';
+import { defineApi } from './phases/apitest/defineApi';
+import { defineRelativeFiles } from './phases/apitest/defineRelativeFiles';
+import { processFiles } from './utils/processFiles';
 
 const configuration = vscode.workspace.getConfiguration();
 const apis = configuration.get<Record<string, string>>('llmExtension.apis');
@@ -120,7 +125,7 @@ export function activate(context: vscode.ExtensionContext) {
             const classes = await splitCodeToFunctions(code);
             
             const selectedLanguage = await showSelectionList(languages);
-            const frameworks = await getFrameworkList(String(selectedLanguage));
+            const frameworks = await getFrameworkList(String(selectedLanguage), code);
 
             const selectedFramework = await showSelectionList(frameworks);
 
@@ -222,13 +227,11 @@ export function activate(context: vscode.ExtensionContext) {
                 const languages = await detectLanguages(selectedText);
                 const selectedLanguage = await showSelectionList(languages);
 
-                const frameworks = await getFrameworkList(String(selectedLanguage));
+                const frameworks = await getFrameworkList(String(selectedLanguage), selectedText);
                 vscode.window.showInformationMessage(String(frameworks));
                 const selectedFramework = await showSelectionList(frameworks);
 
                 if (selectedFramework !== 'none') {
-                    // vscode.window.showInformationMessage(`You selected: ${selectedFramework}`);
-
                     // Generate unit tests using the selected framework
                     const unitTests = await genUnittest(String(selectedLanguage), String(selectedFramework), selectedText);
 
@@ -267,14 +270,80 @@ export function activate(context: vscode.ExtensionContext) {
            
     });
 
+    // const genApiTestFileCommand = vscode.commands.registerCommand('generateApiTestFile', async () => {
+    //     const uri = await vscode.window.showOpenDialog({
+    //         canSelectMany: false,
+    //         filters: {
+    //             'All Files': ['*'],
+    //         },
+    //     });
+
+    //     if (!uri || uri.length === 0) {
+    //         vscode.window.showErrorMessage("No file selected.");
+    //         return;
+    //     }
+
+    //     const fileUri = uri[0];
+    //     const filePath = fileUri.fsPath;
+    //     try {
+    //         const code = await fs.readFile(filePath, { encoding: 'utf8' });
+
+    //         // const code_status = await getCodeReviewResponse(code);
+    //         const languages = await detectLanguages(code);
+    //         // const classes = await splitCodeToFunctions(code);
+            
+    //         const selectedLanguage = await showSelectionList(languages);
+    //         const frameworks = await getFrameworkList(String(selectedLanguage));
+
+    //         const selectedFramework = await showSelectionList(frameworks);
+
+    //         try {
+    //             // for (const c of classes) {
+    //                 const testingCodes = await genApitest(String(selectedLanguage), String(selectedFramework), code);
+                        
+    //                 if (testingCodes) {
+    //                     // unittests.push(testingCodes)
+    //                     createTestFile(filePath,testingCodes );
+    //                     vscode.window.showInformationMessage(`Unit tests generated and saved`);
+    //                 } else {
+    //                     vscode.window.showErrorMessage('No unit tests were generated.');
+    //                 }
+
+    //         }
+    //         catch (error) {
+    //             vscode.window.showErrorMessage(`An error occurred: ${String(error)}`);
+    //         }
+
+    //     } catch (err) {
+    //         const errorMessage = err instanceof Error ? err.message : String(err);
+    //         vscode.window.showErrorMessage(`Failed to generate unit tests: ${errorMessage}`);
+    //     }
+            
+    // });
+    
     const genApiTestFileCommand = vscode.commands.registerCommand('generateApiTestFile', async () => {
+        const project = await vscode.window.showOpenDialog({
+            canSelectFolders: true, // Enable folder selection
+            canSelectFiles: false,  // Disable file selection
+            canSelectMany: false,   // Allow only one folder to be selected
+            openLabel: 'Select Project',
+        });
+        if (!project || project.length === 0) {
+            vscode.window.showErrorMessage("No project selected.");
+            return;
+        } 
+        const projectUri = project[0];
+        const folderPath = projectUri.fsPath;
+
         const uri = await vscode.window.showOpenDialog({
             canSelectMany: false,
-            filters: {
-                'All Files': ['*'],
-            },
+            canSelectFiles: true,
+            canSelectFolders: false,
+            openLabel: 'Select Api Routes',
+            filters: { 'All Files': ['*'] },
+            defaultUri: projectUri,  // Set default path to selected folder
         });
-
+        
         if (!uri || uri.length === 0) {
             vscode.window.showErrorMessage("No file selected.");
             return;
@@ -282,45 +351,56 @@ export function activate(context: vscode.ExtensionContext) {
 
         const fileUri = uri[0];
         const filePath = fileUri.fsPath;
+
+        const code = await fs.readFile(filePath, { encoding: 'utf8' });
+
+        // const code_status = await getCodeReviewResponse(code);
+        const languages = await detectLanguages(code);
+        // const classes = await splitCodeToFunctions(code);
+        
+        const selectedLanguage = await showSelectionList(languages);
+        const frameworks = await getFrameworkList(String(selectedLanguage), code);
+
+        const selectedFramework = await showSelectionList(frameworks);
+
+
         try {
-            const code = await fs.readFile(filePath, { encoding: 'utf8' });
-
-            const code_status = await getCodeReviewResponse(code);
-            const languages = await detectLanguages(code);
-            const classes = await splitCodeToFunctions(code);
-            
-            const selectedLanguage = await showSelectionList(languages);
-            const frameworks = await getFrameworkList(String(selectedLanguage));
-
-            const selectedFramework = await showSelectionList(frameworks);
-
-            // Create a new test file name
-            // let unittests: string[] = []; // Use an array to collect unit tests
-            try {
-                // for (const c of classes) {
-                    const testingCodes = await genApitest(String(selectedLanguage), String(selectedFramework), code);
-                        
-                    if (testingCodes) {
-                        // unittests.push(testingCodes)
-                        createTestFile(filePath,testingCodes );
-                        vscode.window.showInformationMessage(`Unit tests generated and saved`);
-                    } else {
-                        vscode.window.showErrorMessage('No unit tests were generated.');
+            const tree = getTree(folderPath);
+            // console.log(`Tree: `, tree);
+            const api = await defineApi(filePath);
+            if(api != `none`){
+                // console.log(`Api:`, api);
+                const files = await defineRelativeFiles(api, tree);
+                if(files){
+                    // console.log(`related Files: `, files);
+                    const code = processFiles(files, folderPath);
+                    // console.log(`Code: `,code);
+                    try {
+                        const testingCodes = await genApitest(String(selectedLanguage), String(selectedFramework), code);
+                            
+                        if (testingCodes) {
+                            createTestFile(filePath,testingCodes );
+                            vscode.window.showInformationMessage(`Testing Code generated and saved`);
+                        } else {
+                            vscode.window.showErrorMessage('No Api tests were generated.');
+                        }
                     }
-            //}
-            // const rawunittest = unittests.join('\n');
-
+                    catch (error) {
+                        vscode.window.showErrorMessage(`An error occurred: ${String(error)}`);
+                    }
+                }
             }
-            catch (error) {
-                vscode.window.showErrorMessage(`An error occurred: ${String(error)}`);
+            else{
+                vscode.window.showErrorMessage('No Api in this file');
             }
-
+            
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : String(err);
-            vscode.window.showErrorMessage(`Failed to generate unit tests: ${errorMessage}`);
+            vscode.window.showErrorMessage(`Failed to generate api tests: ${errorMessage}`);
         }
             
     });
+
     context.subscriptions.push(
         configureApisCmd,
         genUnitTestFolderCommand, 

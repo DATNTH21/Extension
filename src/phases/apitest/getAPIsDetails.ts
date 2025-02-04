@@ -6,9 +6,7 @@ import { retryOn429 } from '../../utils/fix429';
 import { extractCode } from '../../utils/extractCode';
 const generateResponse = initializeLLM();
 
-export async function getAPIsDetails(programminglanguage: string, source: string): Promise<any[]> {
-    // apiKey = 'AIzaSyDXmoUw6_s7FgJiSKKAPcDvJgaLJ1xMVrw'; // Assuming you're getting your API key from an environment variable
-    
+export async function getAPIsDetails(programminglanguage: string, source: string): Promise<any[]> {    
     const getPromptFile = path.join(__dirname, 'prompts/api_testing/getAPIsDetails.txt');
     const prompt = `Analyze the provided {PROGRAMMING LANGUAGE} code for API definitions in the SOURCE CODE. Extract the following details for each API endpoint:
         1. HTTP METHOD: The HTTP verb used (e.g., GET, POST, PUT, PATCH, DELETE).

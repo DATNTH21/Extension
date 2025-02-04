@@ -1,9 +1,0 @@
-```json
-{
-  "test_scope": {
-    "direct_methods": ["Evaluate", "RandomOutcome", "ProcessInput", "CalculateFactorial"],
-    "auxiliary_methods": ["ReadFile"],
-    "dependencies": ["System.IO"]
-  }
-}
-```

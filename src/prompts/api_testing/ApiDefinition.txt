@@ -1,0 +1,30 @@
+Given the source code of a project, please identify all API endpoints defined in the code.
+ This code may include files such as controllers, routes, and handlers, which contain logic for processing HTTP requests.
+* Input Example:
+ ** Code:
+ // routes.go
+    r.HandleFunc("/books", GetBooksHandler).Methods("GET")
+    r.HandleFunc("/books/{id}", GetBookByIDHandler).Methods("GET")
+    r.HandleFunc("/books", CreateBookHandler).Methods("POST")
+* Output Example:
+{
+  "api_endpoints": [
+    {
+      "method": "GET",
+      "path": "/books",
+      "handler_function": "GetBooksHandler",
+    },
+    {
+      "method": "GET",
+      "path": "/books/{id}",
+      "handler_function": "GetBookByIDHandler",
+    },
+    {
+      "method": "POST",
+      "path": "/books",
+      "handler_function": "CreateBookHandler",
+    }
+  ]
+}
+or return 'none' if not any api.
+with this Input: {Code}, Output (json or 'none')?

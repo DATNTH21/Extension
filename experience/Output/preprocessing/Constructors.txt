@@ -1,4 +1,0 @@
-```json
-{}
-```
-There is no constructor defined in the provided C# code.  The `ComplexLogic` class uses a default constructor (the one with no parameters) which is implicitly provided by the compiler.  Since there are no dependencies injected into the class, there's no need for mocks or stubs.

@@ -1,78 +1,64 @@
+using HRMSystem.Services;
+using HRMSystem.Models;
+
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using QuanLySach.Data;
-using QuanLySach.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace QuanLySach.Controllers
+namespace HRMSystem.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    public class BooksController : ControllerBase
+    [Route("api/[controller]")]
+    public class ActivityController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IActivityService _ActivityService;
 
-        public BooksController(AppDbContext context)
+        public ActivityController(IActivityService activityService)
         {
-            _context = context;
+            _ActivityService = activityService;
         }
 
-        // GET: api/books
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Book>>> GetBooks()
+        public IActionResult GetAllActivities()
         {
-            return await _context.Books.ToListAsync();
+            var result = _ActivityService.GetAllActivities();
+            return Ok(result);
         }
 
-        // GET: api/books/5
+        [HttpGet("NotJoined/{maNV}")]
+        public IActionResult GetNotJoinedActivities(string maNV)
+        {
+            var unjoinedActivities = _ActivityService.GetActivitiesNotJoinedByEmployee(maNV);
+            return Ok(unjoinedActivities);
+
+        }
         [HttpGet("{id}")]
-        public async Task<ActionResult<Book>> GetBook(int id)
+        public IActionResult GetActivityById(int id)
         {
-            var book = await _context.Books.FindAsync(id);
-            if (book == null)
-            {
-                return NotFound();
-            }
-            return book;
+            var activity = _ActivityService.GetActivityById(id);
+            if (activity == null) return NotFound(new { Message = "Hoạt động không tồn tại!" });
+            return Ok(activity);
         }
 
-        // POST: api/books
         [HttpPost]
-        public async Task<ActionResult<Book>> PostBook(Book book)
+        public IActionResult AddActivity([FromBody] Activity activity)
         {
-            _context.Books.Add(book);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetBook), new { id = book.Id }, book);
+            var newActivity = _ActivityService.AddActivity(activity);
+            return Ok(new { Message = "Thêm mới hoạt động thành công!", Activity = newActivity });
         }
 
-        // PUT: api/books/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutBook(int id, Book book)
+        public IActionResult UpdateActivity(int id, [FromBody] Activity activity)
         {
-            if (id != book.Id)
-            {
-                return BadRequest();
-            }
-            _context.Entry(book).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return NoContent();
+            var updatedActivity = _ActivityService.UpdateActivity(id, activity);
+            if (updatedActivity == null) return NotFound(new { Message = "Hoạt động không tồn tại!" });
+            return Ok(new { Message = "Cập nhật hoạt động thành công!", Activity = updatedActivity });
         }
 
-        // DELETE: api/books/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBook(int id)
+        public IActionResult DeleteActivity(int id)
         {
-            var book = await _context.Books.FindAsync(id);
-            if (book == null)
-            {
-                return NotFound();
-            }
-            _context.Books.Remove(book);
-            await _context.SaveChangesAsync();
-            return NoContent();
+            var isDeleted = _ActivityService.DeleteActivity(id);
+            if (!isDeleted) return NotFound(new { Message = "Hoạt động không tồn tại!" });
+            return Ok(new { Message = "Xóa hoạt động thành công!" });
         }
     }
 }

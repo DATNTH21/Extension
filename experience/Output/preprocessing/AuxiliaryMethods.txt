@@ -1,7 +1,0 @@
-```json
-{
-  "auxiliary_methods": {
-    "file_system_operations": ["ReadFile"]
-  }
-}
-```

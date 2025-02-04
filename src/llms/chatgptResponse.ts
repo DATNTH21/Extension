@@ -18,7 +18,7 @@ export async function generateResponse(prompt: string): Promise<string> {
         const response = await openai.chat.completions.create({
             model: 'gpt-4', // Specify the model to use
             messages: [{ role: 'user', content: prompt }],
-            max_tokens: 1000, // Maximum number of tokens to generate
+            max_tokens: 3000, // Maximum number of tokens to generate
             temperature: 0.7,  // Controls randomness: lower is more deterministic
         });
         return response?.choices?.[0]?.message?.content?.trim() || 'No response generated';

@@ -22,7 +22,7 @@ logs/
 
 # Coverage directory used by tools like istanbul
 coverage/
-
+experience/
 # IDE specific files
 .vscode/
 .idea/
@@ -35,3 +35,4 @@ Data Structures & Algorithms/
 
 .nyc_output/
 CodeTest/
+

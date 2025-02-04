@@ -1,5 +1,0 @@
-```json
-{
-  "chained_methods": {}
-}
-```
