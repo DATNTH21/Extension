@@ -2,7 +2,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { initializeLLM } from '../../setting/extensionSetup';
 import { retryOn429 } from '../../utils/fix429';
-
+import { extractCode } from '../../utils/extractCode';
 const generateResponse = initializeLLM();
 
 export async function genApitest(
@@ -37,8 +37,8 @@ Noted: Output only be ready run code if explain anything, comment following prog
         // const outputFilePath = path.join(__dirname, 'Output/apiTestingCode.go');
         // await fs.mkdir(path.dirname(outputFilePath), { recursive: true }); // Ensure directory exists
         // await fs.writeFile(outputFilePath, apiTestCode, 'utf8');
-
-        return apiTestCode;
+        const code = extractCode(apiTestCode) || 'error';
+        return code;
     } catch (error) {
         console.error('Error generating API test:', error);
         throw error;
