@@ -154,20 +154,37 @@ export function activate(context: vscode.ExtensionContext) {
 
     // Registering the command to generate unit tests for a file
     const genUITestingScript = vscode.commands.registerCommand('generateUITestingScript', async () => {
-        const uri = await vscode.window.showOpenDialog({
-            canSelectMany: false,
-            filters: {
-                'All Files': ['*'],
-            },
-        });
+        let allFilePaths = [];
 
-        if (!uri || uri.length === 0) {
-            vscode.window.showErrorMessage("No file selected.");
+        while (true) {
+            const uris = await vscode.window.showOpenDialog({
+                title: "Select Files (Multiple Selections Allowed)",
+                canSelectMany: true,
+                canSelectFiles: true,
+                canSelectFolders: false,
+                openLabel: "Select Files",
+                filters: { 'All Files': ['*'] },
+            });
+
+            if (uris && uris.length > 0) {
+                allFilePaths.push(...uris.map(uri => uri.fsPath));
+            }
+
+            const continueSelection = await vscode.window.showQuickPick(
+                ["Select More Files", "Done"],
+                { placeHolder: "Do you want to select more files?" }
+            );
+
+            if (continueSelection !== "Select More Files") {
+                break;
+            }
+        }
+
+        if (allFilePaths.length === 0) {
+            vscode.window.showErrorMessage("No files selected.");
             return;
         }
 
-        const fileUri = uri[0];
-        const filePath = fileUri.fsPath;
         try {
             const code = await fs.readFile(filePath, { encoding: 'utf8' });
 
