@@ -54,6 +54,10 @@
       {
         "command": "configureApis",
         "title": "WeTest: Configure LLM APIs"
+      },
+      {
+        "command": "generateUITestingScript",
+        "title": "WeTest: Generate UI Testing Script"
       }
     ]
   },

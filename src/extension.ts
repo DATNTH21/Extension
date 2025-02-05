@@ -12,7 +12,8 @@ import {
     getRecommendFramework,
     generateFileName,
     detectFramework,
-    getRecommendTool
+    getRecommendTool,
+    getUITestingScriptLanguage
 } from './utils/responseGenerator';
 import { highlightCodeFunc, disableHighlight } from './utils/highlight';
 import { showSelectionList } from './utils/showselection';
@@ -96,11 +97,63 @@ export function activate(context: vscode.ExtensionContext) {
         // Open the settings.json file
         await vscode.commands.executeCommand('workbench.action.openSettingsJson');
     });
+    const genUnitTestFileCommand = vscode.commands.registerCommand('generateUnitTestFile', async () => {
+        const uri = await vscode.window.showOpenDialog({
+            canSelectMany: false,
+            filters: {
+                'All Files': ['*'],
+            },
+        });
 
+        if (!uri || uri.length === 0) {
+            vscode.window.showErrorMessage("No file selected.");
+            return;
+        };
+
+        const fileUri = uri[0];
+        const filePath = fileUri.fsPath;
+        try {
+            const code = await fs.readFile(filePath, { encoding: 'utf8' });
+
+            //const code_status = await getCodeReviewResponse(code);
+            const languages = await detectLanguages(code);
+            //const classes = await splitCodeToFunctions(code);
+
+            const selectedLanguage = await showSelectionList(languages);
+            const frameworks = await getFrameworkList(String(selectedLanguage));
+
+            const selectedFramework = await showSelectionList(frameworks);
+
+            // Create a new test file name
+            let unittests: string[] = []; // Use an array to collect unit tests
+            try {
+                // for (const c of classes) {
+                const testingCodes = await genUnittest(String(selectedLanguage), String(selectedFramework), code);
+
+                if (testingCodes) {
+                    // unittests.push(testingCodes)
+                    createTestFile(filePath, testingCodes);
+                    vscode.window.showInformationMessage(`Unit tests generated and saved`);
+                } else {
+                    vscode.window.showErrorMessage('No unit tests were generated.');
+                }
+                //}
+
+            }
+            catch (error) {
+                vscode.window.showErrorMessage(`An error occurred: ${String(error)}`);
+            }
+
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : String(err);
+            vscode.window.showErrorMessage(`Failed to generate unit tests: ${errorMessage}`);
+        };
+
+    });
 
 
     // Registering the command to generate unit tests for a file
-    const genUnitTestFileCommand = vscode.commands.registerCommand('generateUnitTestFile', async () => {
+    const genUITestingScript = vscode.commands.registerCommand('generateUITestingScript', async () => {
         const uri = await vscode.window.showOpenDialog({
             canSelectMany: false,
             filters: {
@@ -118,36 +171,24 @@ export function activate(context: vscode.ExtensionContext) {
         try {
             const code = await fs.readFile(filePath, { encoding: 'utf8' });
 
-            const code_status = await getCodeReviewResponse(code);
-            // const languages = await detectLanguages(code);
-            const framework = await detectFramework(code);
-            const classes = await splitCodeToFunctions(code);
+            // const frameworks = await detectFramework(code);
+            // const selectedFramework = await showSelectionList(frameworks);
+            const tools = await getRecommendTool(code);
+            const selectedTool = await showSelectionList(tools);
 
-            // const selectedLanguage = await showSelectionList(languages);
-            const selectedFrameworks = await showSelectionList(framework);
-            // const frameworks = await getFrameworkList(String(selectedLanguage));
+            const languages = await getUITestingScriptLanguage(String(selectedTool));
+            const selectedLanguage = await showSelectionList(languages);
 
-            const tools = await getRecommendTool(String(selectedFrameworks), code);
-            //const selectedFramework = await showSelectionList(frameworks);
-
-            const selectedTools = await showSelectionList(tools);
-
-            // Create a new test file name
             let unittests: string[] = []; // Use an array to collect unit tests
             try {
-                // for (const c of classes) {
-                const testingCodes = await genUITestScript(String(selectedFrameworks), String(selectedTools), code);
+                const testingCodes = await genUITestScript(String(selectedTool), String(selectedLanguage), code);
 
                 if (testingCodes) {
-                    // unittests.push(testingCodes)
                     createTestFile(filePath, testingCodes);
-                    vscode.window.showInformationMessage(`Unit tests generated and saved`);
+                    vscode.window.showInformationMessage(`UI testing script is generated and saved`);
                 } else {
-                    vscode.window.showErrorMessage('No unit tests were generated.');
+                    vscode.window.showErrorMessage(`No testing scripts were generated.`);
                 }
-                //}
-                // const rawunittest = unittests.join('\n');
-
             }
             catch (error) {
                 vscode.window.showErrorMessage(`An error occurred: ${String(error)}`);
@@ -155,7 +196,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : String(err);
-            vscode.window.showErrorMessage(`Failed to generate unit tests: ${errorMessage}`);
+            vscode.window.showErrorMessage(`Failed to generate UI testing script: ${errorMessage}`);
         }
 
     });
@@ -334,7 +375,8 @@ export function activate(context: vscode.ExtensionContext) {
         genUnitTestFolderCommand,
         genUnitTestFileCommand,
         genUnitTestSelectedCommand,
-        genApiTestFileCommand
+        genApiTestFileCommand,
+        genUITestingScript
     );
 }
 
