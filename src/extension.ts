@@ -208,15 +208,35 @@ export function activate(context: vscode.ExtensionContext) {
             let unittests: string[] = []; // Use an array to collect unit tests
             try {
                 const testingCodes = await genUITestScript(String(selectedTool), String(selectedLanguage), code);
-
-                if (testingCodes) {
-                    createTestFile(filePath, testingCodes);
-                    vscode.window.showInformationMessage(`UI testing script is generated and saved`);
-                } else {
-                    vscode.window.showErrorMessage(`No testing scripts were generated.`);
+                vscode.window.showInformationMessage(`${testingCodes}`)
+                if (!testingCodes) {
+                    vscode.window.showErrorMessage('No testing scripts were generated.');
+                    return;
                 }
-            }
-            catch (error) {
+
+                try {
+                    const fileUri = await vscode.window.showSaveDialog({
+                        defaultUri: vscode.Uri.parse(`file:///test`),
+                        filters: {
+                            'All Files': ['*']
+                        }
+                    });
+
+                    if (!fileUri) {
+                        console.log('File save was canceled');
+                        return;
+                    }
+
+                    const testFilePath = fileUri.fsPath;
+                    await fs.writeFile(testFilePath, testingCodes, { encoding: 'utf8' });
+
+                    vscode.window.showInformationMessage('UI testing script is generated and saved');
+                } catch (error) {
+                    console.error('Failed to create UI testing script file:', error);
+                    throw error;
+                }
+
+            } catch (error) {
                 vscode.window.showErrorMessage(`An error occurred: ${String(error)}`);
             }
 
