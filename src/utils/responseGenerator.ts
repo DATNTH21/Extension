@@ -71,7 +71,7 @@ export async function getRecommendTool(code: string): Promise<string[]> {
 }
 
 export async function getUITestingScriptLanguage(tool: string): Promise<string[]> {
-    const recommendtool = `List the most popular programming languages used for writing scripts in the UI testing tool ${tool}, ordered from most popular to least popular based on current usage statistics. Format the response as a comma-separated list without any explanations.`;
+    const recommendtool = `List the most popular programming languages used for writing UI Testing scripts in the UI testing tool ${tool}, ordered from most popular to least popular based on current usage statistics. Format the response as a comma-separated list (e.g., a, b, c) without any explanations.`;
     return retryOn429(async () => {
         const response = await (await generateResponse)(recommendtool);
         return response.split(',').map(fw => fw.trim());
