@@ -186,8 +186,17 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         try {
-            const code = await fs.readFile(filePath, { encoding: 'utf8' });
 
+            let code = "";
+            for (const filePath of allFilePaths) {
+                try {
+                    const content = await fs.readFile(filePath, "utf8");
+                    const fileName = path.basename(filePath);
+                    code += `=== ${fileName} ===\n${content}\n\n`; // Append file name and content
+                } catch (error) {
+                    vscode.window.showErrorMessage(`Error reading ${filePath}: ${String(error)}`);
+                }
+            }
             // const frameworks = await detectFramework(code);
             // const selectedFramework = await showSelectionList(frameworks);
             const tools = await getRecommendTool(code);
