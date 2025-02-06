@@ -61,7 +61,7 @@ export async function getRecommendFramework(language: string, code: string) {
 }
 
 export async function getRecommendTool(code: string): Promise<string[]> {
-    const recommendtool = `Analyze the provided frontend code and identify the most popular and suitable automated UI testing tools that can be used, ordered from the most popular and suitable to the least. If no relevant tools are found, return 'none'. Format the response as a comma-separated list (e.g., a, b, c) without any explanations. 
+    const recommendtool = `Analyze the provided frontend code and identify the most popular and suitable automated UI Test Automation tools that can be used, ordered from the most popular and suitable to the least. If no relevant tools are found, return 'none'. Format the response as a comma-separated list (e.g., a, b, c) without any explanations. 
                             Code: ${code}
                             `;
     return retryOn429(async () => {
@@ -71,7 +71,7 @@ export async function getRecommendTool(code: string): Promise<string[]> {
 }
 
 export async function getUITestingScriptLanguage(tool: string): Promise<string[]> {
-    const recommendtool = `Identify the most popular programming languages used for writing UI Testing scripts in the UI testing tool ${tool}, ordered from most popular to least popular based on current usage statistics. Format the response as a comma-separated list (e.g., a, b, c) without any explanations.`;
+    const recommendtool = `Identify the most popular programming languages used for writing UI Testing scripts in the UI Test Automation tool ${tool}, ordered from most popular to least popular. Format the response as a comma-separated list (e.g. "Python, Java, C#") without any explanations.`;
     return retryOn429(async () => {
         const response = await (await generateResponse)(recommendtool);
         return response.split(',').map(fw => fw.trim());
