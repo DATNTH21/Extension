@@ -77,3 +77,32 @@ export async function generateFileName(code:string){
     });
 
 }
+
+// UITESTING
+export async function getRecommendTool(code: string): Promise<string[]> {
+    const recommendtool = `Analyze the provided frontend code and identify the most popular and suitable automated UI Test Automation tools that can be used, ordered from the most popular and suitable to the least. If no relevant tools are found, return 'none'. Format the response as a comma-separated list (e.g., a, b, c) without any explanations. 
+                            Code: ${code}
+                            `;
+    return retryOn429(async () => {
+        const response = await (await generateResponse)(recommendtool);
+        return response.split(',').map(fw => fw.trim());
+    });
+}
+
+export async function detectFramework(code: string): Promise<string[]> {
+    const detectedLanguagesPrompt = `Analyze the following code snippet and identify the programming languages along with any frontend-related frameworks. Respond only with a comma-separated list in the format "language (framework)" where applicable. If no relevant frontend framework is detected, return just the language name. Do not include explanations. Code: ${code}`;
+
+    return retryOn429(async () => {
+        const response = await (await generateResponse)(detectedLanguagesPrompt);
+        return response.split(',').map(lang => lang.trim());
+    });
+}
+
+export async function getUITestingScriptLanguage(tool: string): Promise<string[]> {
+    const recommendtool = `Identify the most popular programming languages used for writing UI Testing scripts in the UI Test Automation tool ${tool}, ordered from most popular to least popular. Format the response as a comma-separated list (e.g. "Python, Java, C#") without any explanations.`;
+    return retryOn429(async () => {
+        const response = await (await generateResponse)(recommendtool);
+        return response.split(',').map(fw => fw.trim());
+    });
+}
+

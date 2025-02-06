@@ -10,7 +10,9 @@ import {
     splitCodeToFunctions, 
     getProgrammingLanguages,
     getRecommendFramework,
-    generateFileName
+    generateFileName,
+    getRecommendTool,
+    getUITestingScriptLanguage
 } from './utils/responseGenerator';
 import { highlightCodeFunc, disableHighlight} from './utils/highlight';
 import {showSelectionList} from './utils/showselection';
@@ -23,6 +25,7 @@ import { genApitest } from './phases/apitest/apiProcess';
 import { defineApi } from './phases/apitest/defineApi';
 import { defineRelativeFiles } from './phases/apitest/defineRelativeFiles';
 import { processFiles } from './utils/processFiles';
+import { genUITestScript } from './phases/uitest/UITestProcess';
 
 const configuration = vscode.workspace.getConfiguration();
 const apis = configuration.get<Record<string, string>>('llmExtension.apis');
@@ -400,13 +403,107 @@ export function activate(context: vscode.ExtensionContext) {
         }
             
     });
+    const genUITestingScript = vscode.commands.registerCommand('generateUITestingScript', async () => {
+        let allFilePaths = [];
+
+        while (true) {
+            const uris = await vscode.window.showOpenDialog({
+                title: "Select Files (Multiple Selections Allowed)",
+                canSelectMany: true,
+                canSelectFiles: true,
+                canSelectFolders: false,
+                openLabel: "Select Files",
+                filters: { 'All Files': ['*'] },
+            });
+
+            if (uris && uris.length > 0) {
+                allFilePaths.push(...uris.map(uri => uri.fsPath));
+            }
+
+            const continueSelection = await vscode.window.showQuickPick(
+                ["Select More Files", "Done"],
+                { placeHolder: "Do you want to select more files?" }
+            );
+
+            if (continueSelection !== "Select More Files") {
+                break;
+            }
+        }
+
+        if (allFilePaths.length === 0) {
+            vscode.window.showErrorMessage("No files selected.");
+            return;
+        }
+
+        try {
+
+            let code = "";
+            for (const filePath of allFilePaths) {
+                try {
+                    const content = await fs.readFile(filePath, "utf8");
+                    const fileName = path.basename(filePath);
+                    code += `=== ${fileName} ===\n${content}\n\n`; // Append file name and content
+                } catch (error) {
+                    vscode.window.showErrorMessage(`Error reading ${filePath}: ${String(error)}`);
+                }
+            }
+            // const frameworks = await detectFramework(code);
+            // const selectedFramework = await showSelectionList(frameworks);
+            const tools = await getRecommendTool(code);
+            const selectedTool = await showSelectionList(tools);
+
+            const languages = await getUITestingScriptLanguage(String(selectedTool));
+            const selectedLanguage = await showSelectionList(languages);
+
+            let unittests: string[] = []; // Use an array to collect unit tests
+            try {
+                const testingCodes = await genUITestScript(String(selectedTool), String(selectedLanguage), code);
+                vscode.window.showInformationMessage(`${testingCodes}`)
+                if (!testingCodes) {
+                    vscode.window.showErrorMessage('No testing scripts were generated.');
+                    return;
+                }
+
+                try {
+                    const fileUri = await vscode.window.showSaveDialog({
+                        defaultUri: vscode.Uri.parse(`file:///test`),
+                        filters: {
+                            'All Files': ['*']
+                        }
+                    });
+
+                    if (!fileUri) {
+                        console.log('File save was canceled');
+                        return;
+                    }
+
+                    const testFilePath = fileUri.fsPath;
+                    await fs.writeFile(testFilePath, testingCodes, { encoding: 'utf8' });
+
+                    vscode.window.showInformationMessage('UI testing script is generated and saved');
+                } catch (error) {
+                    console.error('Failed to create UI testing script file:', error);
+                    throw error;
+                }
+
+            } catch (error) {
+                vscode.window.showErrorMessage(`An error occurred: ${String(error)}`);
+            }
+
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : String(err);
+            vscode.window.showErrorMessage(`Failed to generate UI testing script: ${errorMessage}`);
+        }
+
+    });
 
     context.subscriptions.push(
         configureApisCmd,
         genUnitTestFolderCommand, 
         genUnitTestFileCommand,
         genUnitTestSelectedCommand, 
-        genApiTestFileCommand
+        genApiTestFileCommand,
+        genUITestingScript
     );
 }
 

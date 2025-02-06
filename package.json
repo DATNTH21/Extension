@@ -16,7 +16,7 @@
         {
           "id": "activityBarContainer",
           "title": "WeTest Extension",
-          "icon": "media/code-icon.svg"
+          "icon": "media/sleeping-svgrepo-com.svg"
         }
       ]
     },
@@ -25,8 +25,7 @@
         {
           "id": "extension.activityBarIcon",
           "name": "Toggle Extension",
-          "command": "extension.toggleFeature",
-          "icon": "media/code-icon.svg"
+          "command": "extension.toggleFeature"
         }
       ]
     },
@@ -44,12 +43,16 @@
         "title": "WeTest: Generate Unit Test For File"
       },
       {
+        "command": "generateUnitTestSelected",
+        "title": "WeTest: Generate Unit Test For Selected Code"
+      },
+      {
         "command": "generateApiTestFile",
         "title": "WeTest: Generate API Test For File"
       },
       {
-        "command": "generateUnitTestSelected",
-        "title": "WeTest: Generate Unit Test For Selected Code"
+        "command": "generateUITestingScript",
+        "title": "WeTest: Generate UI Test"
       },
       {
         "command": "configureApis",

@@ -517,18 +517,37 @@ export async function genApitest01(programminglanguage: string, framework: strin
         }
     }            
     
-async function test(){
-    const dir = `C:/2024-25/Offical/Extension/experience/Input/book-store`;
-    const tree = getTree(dir);
-    console.log(`Tree: `, tree);
-    const path_code = `C:/2024-25/Offical/Extension/experience/Input/book-store/routes/routes.go`
-    const api = await defineApi(path_code);
-    console.log(`Api:`, api);
-    const files = await defineRelativeFiles(api, tree);
-    console.log(`related Files: `, files);
-    const code = processFiles(files, dir);
-    console.log(`Code: `,code);
-    const apicode = await genApitest01("Go","httptest",code);
-    console.log(`Testing code: \n ${apicode}`);
+// async function test(){
+//     const dir = `C:/2024-25/Offical/Extension/experience/Input/book-store`;
+//     const tree = getTree(dir);
+//     console.log(`Tree: `, tree);
+//     const path_code = `C:/2024-25/Offical/Extension/experience/Input/book-store/routes/routes.go`
+//     const api = await defineApi(path_code);
+//     console.log(`Api:`, api);
+//     const files = await defineRelativeFiles(api, tree);
+//     console.log(`related Files: `, files);
+//     const code = processFiles(files, dir);
+//     console.log(`Code: `,code);
+//     const apicode = await genApitest01("Go","httptest",code);
+//     console.log(`Testing code: \n ${apicode}`);
+// }
+// test();
+
+export async function genUITestScript(tool: string, language: string, source: string): Promise<string> {
+    const prompt = `Generate a UI testing script for the following code snippet using the specified testing tool. The script should test all UI elements, interactions, and behaviors detected in the code. Ensure full coverage, including rendering, user interactions, and edge cases. Use best practices for the selected testing tool. Respond only with the file without any explanations.
+
+                    Testing Tool: ${tool}
+                    Script language: ${language}
+                    Code: ${source}  
+    `;
+    const apiKey = 'AIzaSyDXmoUw6_s7FgJiSKKAPcDvJgaLJ1xMVrw'; // Assuming you're getting your API key from an environment variable
+
+    try {
+        const unittest = await generateResponse(prompt, apiKey);
+        console.log("Generated testing script");
+        return String(extractCode(await unittest)); // Ensure unittest is a string before extraction
+    } catch (err) {
+        console.error('Error generating testing script:', err);
+        throw err;
+    }
 }
-test();
