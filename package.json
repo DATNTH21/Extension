@@ -8,7 +8,8 @@
   "main": "./dist/extension.js",
   "packages": {},
   "activationEvents": [
-    "onStartupFinished"
+    "onStartupFinished",
+    "onView:taskStatusView"
   ],
   "contributes": {
     "viewsContainers": {
@@ -16,22 +17,25 @@
         {
           "id": "activityBarContainer",
           "title": "WeTest Extension",
-          "icon": "media/sleeping-svgrepo-com.svg"
+          "icon": "media/test-svgrepo-com.svg"
         }
       ]
     },
     "views": {
       "activityBarContainer": [
         {
-          "id": "extension.activityBarIcon",
-          "name": "Toggle Extension",
-          "command": "extension.toggleFeature"
+          "id": "taskStatusView",
+          "name": "Task Status"
         }
       ]
     },
     "commands": [
       {
-        "command": "extension.toggleFeature",
+        "command": "myExtension.showStatus",
+        "title": "Show Task Status"
+      },
+      {
+        "command": "toggleFeature",
         "title": "Toggle Extension Feature"
       },
       {
@@ -57,6 +61,15 @@
       {
         "command": "configureApis",
         "title": "WeTest: Configure LLM APIs"
+      }
+    ]
+  },
+  "menus": {
+    "view/title": [
+      {
+        "command": "myExtension.showStatus",
+        "when": "view == taskStatusView",
+        "group": "navigation"
       }
     ]
   },

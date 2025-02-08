@@ -6,7 +6,7 @@ import { getTestCasesByMethod } from '../../utils/parseApiTestCases';
 import { createTestFile } from '../../utils/file_utils';
 
 const generateResponse = initializeLLM();
-export async function genApitest(programminglanguage: string, framework: string, source: string): Promise<string[]> {
+export async function genApitest(filepath: string, programminglanguage: string, framework: string, source: string): Promise<string[]> {
     const prompt = `Input Parameters:
     Programming Language: {programminglanguage}
     Framework: {framework}
@@ -26,10 +26,11 @@ export async function genApitest(programminglanguage: string, framework: string,
             const testcase = getTestCasesByMethod(api.method);
   
             // Replace placeholders in input for each API
-            let apiInput = input.replace('testcase', testcase).replace('apidetails', JSON.stringify(api));
+            let apiInput = input.replace('testcase', testcase).replace('apidetails', api);
   
             // Generate the test case and append it to the result
             const apiTestResult = await (await generateResponse)(apiInput);
+            
             apitest.push(apiTestResult)
         }
         return apitest;

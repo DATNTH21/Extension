@@ -37,12 +37,12 @@ export async function getAPIsDetails(programminglanguage: string, source: string
                 }
             ],
             "description": "Retrieves a list of all books."
-        },..
+        }
         ]
         }
 
         Source Code: {sourcecode}
-        Output?
+        Output(only is JSON, not explain anything)?
         `;
 
     // const fileCode = path.join(__dirname, 'Input/sourcecsharp.txt');
