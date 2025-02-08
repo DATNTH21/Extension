@@ -22,7 +22,7 @@ Decode and verify the response body matches mock data.
 Validate specific fields in the response.
 Based on the following code:
 {Code}
-Noted: Output only be ready run code if explain anything, comment following programming language code.`;
+Noted: Output only be {LANGUAGE} code , if explain anything, comment it.`;
 
         // Replace placeholders with actual values
         const input = promptTemplate
@@ -37,8 +37,7 @@ Noted: Output only be ready run code if explain anything, comment following prog
         // const outputFilePath = path.join(__dirname, 'Output/apiTestingCode.go');
         // await fs.mkdir(path.dirname(outputFilePath), { recursive: true }); // Ensure directory exists
         // await fs.writeFile(outputFilePath, apiTestCode, 'utf8');
-        const code = extractCode(apiTestCode) || 'error';
-        return code;
+        return String(extractCode(await apiTestCode));
     } catch (error) {
         console.error('Error generating API test:', error);
         throw error;

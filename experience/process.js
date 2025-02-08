@@ -403,10 +403,10 @@ function test() {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    dir = "C:/2024-25/Offical/Extension/experience/Input/book-store";
+                    dir = "C:/2024-25/IS Dev/DoAn";
                     tree = getTree(dir);
                     console.log("Tree: ", tree);
-                    path_code = "C:/2024-25/Offical/Extension/experience/Input/book-store/routes/routes.go";
+                    path_code = "C:/2024-25/IS Dev/DoAn/Controllers/UserController.cs";
                     return [4 /*yield*/, defineApi(path_code)];
                 case 1:
                     api = _a.sent();
@@ -417,7 +417,7 @@ function test() {
                     console.log("related Files: ", files);
                     code = processFiles(files, dir);
                     console.log("Code: ", code);
-                    return [4 /*yield*/, genApitest01("Go", "httptest", code)];
+                    return [4 /*yield*/, genApitest01("C#", "xUnit", code)];
                 case 3:
                     apicode = _a.sent();
                     console.log("Testing code: \n ".concat(apicode));
@@ -427,3 +427,19 @@ function test() {
     });
 }
 test();
+// export async function genUITestScript(tool: string, language: string, source: string): Promise<string> {
+//     const prompt = `Generate a UI testing script for the following code snippet using the specified testing tool. The script should test all UI elements, interactions, and behaviors detected in the code. Ensure full coverage, including rendering, user interactions, and edge cases. Use best practices for the selected testing tool. Respond only with the file without any explanations.
+//                     Testing Tool: ${tool}
+//                     Script language: ${language}
+//                     Code: ${source}  
+//     `;
+//     const apiKey = 'AIzaSyDXmoUw6_s7FgJiSKKAPcDvJgaLJ1xMVrw'; // Assuming you're getting your API key from an environment variable
+//     try {
+//         const unittest = await generateResponse(prompt, apiKey);
+//         console.log("Generated testing script");
+//         return String(extractCode(await unittest)); // Ensure unittest is a string before extraction
+//     } catch (err) {
+//         console.error('Error generating testing script:', err);
+//         throw err;
+//     }
+// }
