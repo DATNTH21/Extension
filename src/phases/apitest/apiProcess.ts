@@ -5,7 +5,7 @@ import { retryOn429 } from '../../utils/fix429';
 import { extractCode } from '../../utils/extractCode';
 const generateResponse = initializeLLM();
 
-export async function genApitest(
+export async function genMockingApitest(
     programmingLanguage: string,
     framework: string,
     source: string
@@ -33,11 +33,7 @@ Noted: Output only be {LANGUAGE} code , if explain anything, comment it.`;
         // Generate API test using LLM with retry mechanism
         const apiTestCode = await retryOn429(async () => (await generateResponse)(input));
 
-        // Define output file path and save generated test code
-        // const outputFilePath = path.join(__dirname, 'Output/apiTestingCode.go');
-        // await fs.mkdir(path.dirname(outputFilePath), { recursive: true }); // Ensure directory exists
-        // await fs.writeFile(outputFilePath, apiTestCode, 'utf8');
-        return String(extractCode(await apiTestCode));
+        return String(extractCode(apiTestCode));
     } catch (error) {
         console.error('Error generating API test:', error);
         throw error;

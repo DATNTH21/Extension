@@ -52,11 +52,15 @@
       },
       {
         "command": "generateApiTestFile",
-        "title": "WeTest: Generate API Test For File"
+        "title": "WeTest: Generate API Test Code For File"
+      },
+      {
+        "command": "generateMockApiTestFile",
+        "title": "WeTest: Generate Mocking API Test Code For File"
       },
       {
         "command": "generateUITestingScript",
-        "title": "WeTest: Generate UI Test"
+        "title": "WeTest: Generate UI Script"
       },
       {
         "command": "configureApis",

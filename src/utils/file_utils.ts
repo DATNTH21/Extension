@@ -1,5 +1,6 @@
 import * as path from 'path';
 import { promises as fs } from 'fs';
+import * as fa from 'fs';
 
 
 // Function to read file content from a specified file path
@@ -39,19 +40,17 @@ export async function createTestFile(filePath: string, finalUnitTests: string): 
     }
 }
 
-export async function createTestFiles(filePath: string, finalUnitTests: string): Promise<string> {
+export async function createTestFileS(project: string,testFileName:string, finalUnitTests: string): Promise<string> {
     try {
-        // Extract the file extension (without the dot)
-        const extension = path.extname(filePath).slice(1);
-
-        // Create a new test file name
-        const testFileName = `${path.basename(filePath, path.extname(filePath))}_test.${extension}`;
-
-        // Determine the folder path of the original file
-        const folderPath = path.dirname(filePath);
-
         // Create the full path for the test file
-        const testFilePath = path.join(folderPath, testFileName);
+        const testfolderPath = path.join(project, 'tests');
+
+        if (!fa.existsSync(testfolderPath)) {
+            fa.mkdirSync(testfolderPath, { recursive: true });
+            console.log(`Directory created: ${testfolderPath}`);
+        }
+        
+        const testFilePath = path.join(testfolderPath, testFileName);
 
         // Write the final unit tests to the new test file
         await fs.writeFile(testFilePath, finalUnitTests, { encoding: 'utf8' });

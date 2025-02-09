@@ -6,7 +6,7 @@ import { retryOn429 } from '../../utils/fix429';
 import { extractCode } from '../../utils/extractCode';
 const generateResponse = initializeLLM();
 
-export async function getAPIsDetails(programminglanguage: string, source: string): Promise<any[]> {    
+export async function getAPIsDetails(programminglanguage: string, source: string): Promise<string> {    
     const getPromptFile = path.join(__dirname, 'prompts/api_testing/getAPIsDetails.txt');
     const prompt = `Analyze the provided {PROGRAMMING LANGUAGE} code for API definitions in the SOURCE CODE. Extract the following details for each API endpoint:
         1. HTTP METHOD: The HTTP verb used (e.g., GET, POST, PUT, PATCH, DELETE).
@@ -55,14 +55,7 @@ export async function getAPIsDetails(programminglanguage: string, source: string
                 return (await generateResponse)(input);
             });
             const jsonString = extractCode(result);
-            if(jsonString!= null){
-                const parsedJson = JSON.parse(jsonString);
-                const apisArray = parsedJson.apis;
-                if(apisArray){
-                    return Promise.resolve(apisArray);
-                }
-            }
-            return [];
+            return String(jsonString);
             
     } catch (err) {
         console.error('Error: ', err);
