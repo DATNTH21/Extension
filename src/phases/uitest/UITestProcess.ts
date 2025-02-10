@@ -9,13 +9,44 @@ import { initializeLLM } from '../../setting/extensionSetup';
 
 const generateResponse = initializeLLM();
 
+// Generate a UI testing script for the given code snippets using the specified testing tool.
+//                     The script must:
+//                     Detect and test all UI elements present in the provided code.
+//                     Cover rendering, interactions, and behaviors relevant to the detected UI.
+//                     Handle different UI types (web, mobile, or Windows) based on the provided code.
+//                     Simulate user interactions (clicks, inputs, gestures, keyboard navigation, etc.).
+//                     Include assertions to verify expected UI behavior.
+//                     Manage asynchronous operations (e.g., animations, loading states, delayed UI updates).
+//                     Test edge cases and error handling (invalid inputs, missing fields, unexpected actions).
+//                     Detect if the UI interacts with APIs (fetching, submitting, or processing data).
+//                     Mock API responses to test UI behavior under different conditions (success, failure, timeout).
+//                     Follow best practices for the selected testing tool and language.
+//                     Use modular and maintainable test functions to ensure reusability.
+
+//                     Testing Tool: ${tool}
+//                     Script language: ${language}
+//                     Code: ${source}  
+
 export async function genUITestScript(tool: string, language: string, source: string): Promise<string> {
-    const prompt = `Generate a UI testing script for the following code snippet using the specified testing tool. The script should test all UI elements, interactions, and behaviors detected in the code. Ensure full coverage, including rendering, user interactions, and edge cases. Use best practices for the selected testing tool. Respond only with the file without any explanations.
+    const prompt = `Generate a UI testing script for the given code snippets using the specified testing tool.
+                    The script must:
+                    Detect and test all UI elements present in the provided code.
+                    Cover rendering, interactions, and behaviors relevant to the detected UI.
+                    Handle different UI types (web, mobile, or Windows) based on the provided code.
+                    Simulate user interactions (clicks, inputs, gestures, keyboard navigation, etc.).
+                    Include assertions to verify expected UI behavior.
+                    Manage asynchronous operations (e.g., animations, loading states, delayed UI updates).
+                    Test edge cases and error handling (invalid inputs, missing fields, unexpected actions).
+                    Detect if the UI interacts with APIs (fetching, submitting, or processing data).
+                    Mock API responses to test UI behavior under different conditions (success, failure, timeout).
+                    Follow best practices for the selected testing tool and language.
+                    Use modular and maintainable test functions to ensure reusability.
+                    Avoid using placeholders or incomplete comments. The output should be a fully executable test script, ready to run without modification.
 
                     Testing Tool: ${tool}
                     Script language: ${language}
-                    Code: ${source}  
-    `;
+                    Code: ${source}
+                    Respond only with the file without any explanations.`;
 
     try {
         const uittest = (await generateResponse)(prompt);

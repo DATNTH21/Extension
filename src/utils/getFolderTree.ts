@@ -26,7 +26,29 @@ export function getFolderTree(folderPath: string): any {
     return tree;
 }
 
+export function folderTree(folderPath: string): { files: string[] } {
+    let fileList: string[] = [];
+
+    function traverseDirectory(currentPath: string) {
+        const items = fs.readdirSync(currentPath);
+
+        items.forEach((item) => {
+            const fullPath = path.join(currentPath, item);
+
+            if (fs.statSync(fullPath).isDirectory()) {
+                traverseDirectory(fullPath);
+            } else {
+                fileList.push(fullPath);
+            }
+        });
+    }
+
+    traverseDirectory(folderPath);
+
+    return { files: fileList };
+}
+
 // Example usage
-const folderPath = '../utils';  // Replace with your folder path
-const folderTree = getFolderTree(folderPath);
-console.log(JSON.stringify(folderTree, null, 2));
+// const folderPath = '../utils';  // Replace with your folder path
+// const folderTree = getFolderTree(folderPath);
+// console.log(JSON.stringify(folderTree, null, 2));

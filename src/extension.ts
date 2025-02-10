@@ -3,24 +3,25 @@ import * as fs from 'fs/promises';
 import path from 'path';
 
 import { createTestFile } from './utils/file_utils';
-import { 
+import {
     detectLanguages,
-    getCodeReviewResponse, 
-    getFrameworkList, 
-    splitCodeToFunctions, 
+    getCodeReviewResponse,
+    getFrameworkList,
+    splitCodeToFunctions,
     getProgrammingLanguages,
     getRecommendFramework,
     generateFileName,
     getRecommendTool,
-    getUITestingScriptLanguage
+    getUITestingScriptLanguage,
+    detectUIRelatedFiles
 } from './utils/responseGenerator';
-import { highlightCodeFunc, disableHighlight} from './utils/highlight';
-import {showSelectionList} from './utils/showselection';
-import { getFolderTree } from './utils/getFolderTree';
+import { highlightCodeFunc, disableHighlight } from './utils/highlight';
+import { showSelectionList } from './utils/showselection';
+import { folderTree, getFolderTree } from './utils/getFolderTree';
 
 import { getTree } from './utils/getTree';
 
-import {genUnittest, identifyMocking} from './phases/unittest/unitProcess'
+import { genUnittest, identifyMocking } from './phases/unittest/unitProcess'
 import { genApitest } from './phases/apitest/apiProcess01';
 import { defineApi } from './phases/apitest/defineApi';
 import { defineRelativeFiles } from './phases/apitest/defineRelativeFiles';
@@ -51,7 +52,7 @@ class TaskStatusProvider implements vscode.TreeDataProvider<TaskItem> {
     updateTaskStatus(projectName: string, taskName: string, status: string) {
         const taskKey = `taskStatus_${projectName}`;
         let projectTasks = this.context.workspaceState.get<{ [task: string]: string }>(taskKey, {});
-        
+
         projectTasks[taskName] = status;
         this.context.workspaceState.update(taskKey, projectTasks); // ✅ Save task status
 
@@ -99,7 +100,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.executeCommand('myExtension.refreshTasks');
 
 
-    if(llm == "" || llm == "gemini" && String(apis?.gemini)== "" || llm == "gpt" && String(apis?.gpt)==""){
+    if (llm == "" || llm == "gemini" && String(apis?.gemini) == "" || llm == "gpt" && String(apis?.gpt) == "") {
         vscode.window.showInformationMessage("Please select your LLM type and provide the corresponding API key.");
         vscode.commands.executeCommand('configureApisCmd');
     }
@@ -112,17 +113,17 @@ export function activate(context: vscode.ExtensionContext) {
     highlightButton.show();
     const togglebutton = vscode.commands.registerCommand('toggleHighlight', async () => {
         const editor = vscode.window.activeTextEditor;
-    
+
         if (!editor) {
             vscode.window.showErrorMessage('No active editor found.');
             return;
         }
-    
+
         if (isHighlightingEnabled) {
             // Disable highlight logic
             highlightButton.text = 'Highlight Mock';
             isHighlightingEnabled = false;
-    
+
             // Add logic to remove highlights
             disableHighlight();
             vscode.window.showInformationMessage('Highlighting disabled');
@@ -130,30 +131,30 @@ export function activate(context: vscode.ExtensionContext) {
             // Enable highlight logic
             highlightButton.text = 'Disable Highlight';
             isHighlightingEnabled = true;
-    
+
             // Highlight mocking code
             const codeToHighlight = await identifyMocking(String(editor.document.getText()));
             highlightCodeFunc(editor, codeToHighlight);
             vscode.window.showInformationMessage('Highlighting enabled');
         }
     });
-    
 
-    const configureApisCmd = vscode.commands.registerCommand('configureApis', async () => {    
+
+    const configureApisCmd = vscode.commands.registerCommand('configureApis', async () => {
         // Retrieve the existing `llmExtension.apis` settings
         const existingApis = configuration.get<Record<string, string>>('llmExtension.apis') || {};
-    
+
         if (Object.keys(existingApis).length === 0) {
             // Define default APIs
             const defaultApis = {
                 "llm_active": "gemini",
                 "gpt": "your-api-key-here",
                 "gemini": "your-api-key-here"
-                };
-    
+            };
+
             // Update the settings with default values
             await configuration.update('llmExtension.apis', defaultApis, vscode.ConfigurationTarget.Global);
-    
+
             vscode.window.showInformationMessage(
                 "Default API configuration added to settings.json. Edit it as needed."
             );
@@ -161,12 +162,12 @@ export function activate(context: vscode.ExtensionContext) {
         // Open the settings.json file
         await vscode.commands.executeCommand('workbench.action.openSettingsJson');
     });
-        
+
 
 
     // Registering the command to generate unit tests for a file
     const genUnitTestFileCommand = vscode.commands.registerCommand('generateUnitTestFile', async () => {
-        
+
         const uri = await vscode.window.showOpenDialog({
             canSelectMany: false,
             filters: {
@@ -187,7 +188,7 @@ export function activate(context: vscode.ExtensionContext) {
             const code_status = await getCodeReviewResponse(code);
             const languages = await detectLanguages(code);
             const classes = await splitCodeToFunctions(code);
-            
+
             const selectedLanguage = await showSelectionList(languages);
             const frameworks = await getFrameworkList(String(selectedLanguage), code);
 
@@ -197,17 +198,17 @@ export function activate(context: vscode.ExtensionContext) {
             let unittests: string[] = []; // Use an array to collect unit tests
             try {
                 // for (const c of classes) {
-                    const testingCodes = await genUnittest(String(selectedLanguage), String(selectedFramework), code);
-                        
-                    if (testingCodes) {
-                        // unittests.push(testingCodes)
-                        createTestFile(filePath,testingCodes );
-                        vscode.window.showInformationMessage(`Unit tests generated and saved`);
-                    } else {
-                        vscode.window.showErrorMessage('No unit tests were generated.');
-                    }
-            //}
-            // const rawunittest = unittests.join('\n');
+                const testingCodes = await genUnittest(String(selectedLanguage), String(selectedFramework), code);
+
+                if (testingCodes) {
+                    // unittests.push(testingCodes)
+                    createTestFile(filePath, testingCodes);
+                    vscode.window.showInformationMessage(`Unit tests generated and saved`);
+                } else {
+                    vscode.window.showErrorMessage('No unit tests were generated.');
+                }
+                //}
+                // const rawunittest = unittests.join('\n');
 
             }
             catch (error) {
@@ -218,7 +219,7 @@ export function activate(context: vscode.ExtensionContext) {
             const errorMessage = err instanceof Error ? err.message : String(err);
             vscode.window.showErrorMessage(`Failed to generate unit tests: ${errorMessage}`);
         }
-            
+
     });
 
     // Registering the command to generate unit tests for a folder
@@ -275,7 +276,7 @@ export function activate(context: vscode.ExtensionContext) {
             const errorMessage = err instanceof Error ? err.message : String(err);
             vscode.window.showErrorMessage(`Failed to generate unit tests: ${errorMessage}`);
         }
-           
+
     });
 
     // Registering the command to generate unit tests for selected code
@@ -303,7 +304,7 @@ export function activate(context: vscode.ExtensionContext) {
 
                     // Create the test file with the generated unit tests
                     vscode.window.showInformationMessage(`Unit tests generated and saved to ${testFileName}`);
-                    
+
                     // Get the full path of the currently opened file
                     const filePath = editor.document.uri.fsPath;
                     const fileName = testFileName.replace(/\s+/g, '');
@@ -315,13 +316,13 @@ export function activate(context: vscode.ExtensionContext) {
                         await fs.writeFile(testFilePath.fsPath, unitTests, { encoding: 'utf8' });
                         await vscode.workspace.fs.writeFile(testFilePath, Buffer.from(unitTests, 'utf8'));
                         vscode.window.showInformationMessage(`Test file created: ${fileName}`);
-                    }catch (err) {
-                    const errorMessage = (err as Error).message;
-                    console.error(`Error creating test file: ${errorMessage}`); // Log the error to the console
-                    vscode.window.showErrorMessage(`Failed to create test file: ${errorMessage}`);
+                    } catch (err) {
+                        const errorMessage = (err as Error).message;
+                        console.error(`Error creating test file: ${errorMessage}`); // Log the error to the console
+                        vscode.window.showErrorMessage(`Failed to create test file: ${errorMessage}`);
+                    }
                 }
-            }
-                    else {
+                else {
                     vscode.window.showInformationMessage('No appropriate framework available for this code.');
                 }
             } else {
@@ -330,7 +331,7 @@ export function activate(context: vscode.ExtensionContext) {
         } else {
             vscode.window.showInformationMessage('No active editor.');
         }
-           
+
     });
 
     const genApiTestFileCommand = vscode.commands.registerCommand('generateApiTestFile', async () => {
@@ -354,7 +355,7 @@ export function activate(context: vscode.ExtensionContext) {
             // const code_status = await getCodeReviewResponse(code);
             const languages = await detectLanguages(code);
             // const classes = await splitCodeToFunctions(code);
-            
+
             const selectedLanguage = await showSelectionList(languages);
             const frameworks = await getFrameworkList(String(selectedLanguage), code);
 
@@ -362,23 +363,23 @@ export function activate(context: vscode.ExtensionContext) {
 
             const projectName = vscode.workspace.name || 'default_project';
             const taskName = `API Test - ${filePath}`;
-        
+
             try {
                 // for (const c of classes) {
-                    vscode.commands.executeCommand('myExtension.updateTaskStatus', taskName, 'In Progress');
+                vscode.commands.executeCommand('myExtension.updateTaskStatus', taskName, 'In Progress');
 
-                    const testingCodes = await genApitest(filePath, String(selectedLanguage), String(selectedFramework), code);
-                        
-                    if (testingCodes) {
-                        // unittests.push(testingCodes)
-                        createTestFile(filePath, String(testingCodes));
-                        vscode.commands.executeCommand('myExtension.updateTaskStatus', taskName, 'Completed');
-                        vscode.window.showInformationMessage(`API tests generated and saved`);
-                    } else {
-                        vscode.window.showErrorMessage('No API tests were generated.');
-                        vscode.commands.executeCommand('myExtension.updateTaskStatus', taskName, 'Failed');
+                const testingCodes = await genApitest(filePath, String(selectedLanguage), String(selectedFramework), code);
 
-                    }
+                if (testingCodes) {
+                    // unittests.push(testingCodes)
+                    createTestFile(filePath, String(testingCodes));
+                    vscode.commands.executeCommand('myExtension.updateTaskStatus', taskName, 'Completed');
+                    vscode.window.showInformationMessage(`API tests generated and saved`);
+                } else {
+                    vscode.window.showErrorMessage('No API tests were generated.');
+                    vscode.commands.executeCommand('myExtension.updateTaskStatus', taskName, 'Failed');
+
+                }
 
             }
             catch (error) {
@@ -392,9 +393,9 @@ export function activate(context: vscode.ExtensionContext) {
             const errorMessage = err instanceof Error ? err.message : String(err);
             vscode.window.showErrorMessage(`Failed to generate unit tests: ${errorMessage}`);
         }
-            
+
     });
-    
+
     // const genApiTestFileCommand = vscode.commands.registerCommand('generateApiTestFile', async () => {
     //     const project = await vscode.window.showOpenDialog({
     //         canSelectFolders: true, // Enable folder selection
@@ -417,7 +418,7 @@ export function activate(context: vscode.ExtensionContext) {
     //         filters: { 'All Files': ['*'] },
     //         defaultUri: projectUri,  // Set default path to selected folder
     //     });
-        
+
     //     if (!uri || uri.length === 0) {
     //         vscode.window.showErrorMessage("No file selected.");
     //         return;
@@ -431,7 +432,7 @@ export function activate(context: vscode.ExtensionContext) {
     //     // const code_status = await getCodeReviewResponse(code);
     //     const languages = await detectLanguages(code);
     //     // const classes = await splitCodeToFunctions(code);
-        
+
     //     const selectedLanguage = await showSelectionList(languages);
     //     const frameworks = await getFrameworkList(String(selectedLanguage), code);
 
@@ -451,7 +452,7 @@ export function activate(context: vscode.ExtensionContext) {
     //                 // console.log(`Code: `,code);
     //                 try {
     //                     const testingCodes = await genApitest(String(selectedLanguage), String(selectedFramework), code);
-                            
+
     //                     if (testingCodes) {
     //                         createTestFile(filePath,testingCodes );
     //                         vscode.window.showInformationMessage(`Testing Code generated and saved`);
@@ -467,12 +468,12 @@ export function activate(context: vscode.ExtensionContext) {
     //         else{
     //             vscode.window.showErrorMessage('No Api in this file');
     //         }
-            
+
     //     } catch (err) {
     //         const errorMessage = err instanceof Error ? err.message : String(err);
     //         vscode.window.showErrorMessage(`Failed to generate api tests: ${errorMessage}`);
     //     }
-            
+
     // });
 
     const genUITestingScript = vscode.commands.registerCommand('generateUITestingScript', async () => {
@@ -530,6 +531,95 @@ export function activate(context: vscode.ExtensionContext) {
             let unittests: string[] = []; // Use an array to collect unit tests
             try {
                 const testingCodes = await genUITestScript(String(selectedTool), String(selectedLanguage), code);
+                //vscode.window.showInformationMessage(`${testingCodes}`)
+                if (!testingCodes) {
+                    vscode.window.showErrorMessage('No testing scripts were generated.');
+                    return;
+                }
+
+                try {
+                    const fileUri = await vscode.window.showSaveDialog({
+                        defaultUri: vscode.Uri.parse(`file:///test`),
+                        filters: {
+                            'All Files': ['*']
+                        }
+                    });
+
+                    if (!fileUri) {
+                        console.log('File save was canceled');
+                        return;
+                    }
+
+                    const testFilePath = fileUri.fsPath;
+                    await fs.writeFile(testFilePath, testingCodes, { encoding: 'utf8' });
+
+                    vscode.window.showInformationMessage('UI testing script is generated and saved');
+                } catch (error) {
+                    console.error('Failed to create UI testing script file:', error);
+                    throw error;
+                }
+
+            } catch (error) {
+                vscode.window.showErrorMessage(`An error occurred: ${String(error)}`);
+            }
+
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : String(err);
+            vscode.window.showErrorMessage(`Failed to generate UI testing script: ${errorMessage}`);
+        }
+
+    });
+
+    const genUITestingScriptFolder = vscode.commands.registerCommand('generateUITestingScriptFolder', async () => {
+        const folderUri = await vscode.window.showOpenDialog({
+            canSelectMany: false,
+            openLabel: 'Select a folder',
+            canSelectFolders: true,
+        });
+
+        if (!folderUri || folderUri.length === 0) {
+            vscode.window.showErrorMessage("No folder selected.");
+            return;
+        }
+
+        const folderPath = folderUri[0].fsPath;
+
+        try {
+            const foldertree = folderTree(folderPath);
+
+            const files = JSON.parse(await detectUIRelatedFiles(foldertree.files));
+
+            //vscode.window.showInformationMessage(JSON.stringify(files.files));
+
+            async function readFilesToString(fileList: string[]) {
+                let combinedContent = '';
+
+                for (const filePath of fileList) {
+                    try {
+                        const content = await fs.readFile(path.resolve(filePath), 'utf-8');
+                        combinedContent += `\n// FILE: ${filePath}\n${content}\n`;
+                        //vscode.window.showInformationMessage(combinedContent);
+                    } catch (error) {
+                        vscode.window.showErrorMessage('Error reading file');
+                        throw error;
+                    }
+                };
+                return combinedContent;
+            }
+
+            const code = await readFilesToString(await files.files);
+
+            //vscode.window.showInformationMessage(code);
+
+            const tools = await getRecommendTool(code);
+            const selectedTool = await showSelectionList(tools);
+
+            const languages = await getUITestingScriptLanguage(String(selectedTool));
+            const selectedLanguage = await showSelectionList(languages);
+
+            // let unittests: string[] = []; // Use an array to collect unit tests
+            try {
+                const testingCodes = await genUITestScript(String(selectedTool), String(selectedLanguage), code);
                 vscode.window.showInformationMessage(`${testingCodes}`)
                 if (!testingCodes) {
                     vscode.window.showErrorMessage('No testing scripts were generated.');
@@ -571,11 +661,12 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
         configureApisCmd,
-        genUnitTestFolderCommand, 
+        genUnitTestFolderCommand,
         genUnitTestFileCommand,
-        genUnitTestSelectedCommand, 
+        genUnitTestSelectedCommand,
         genApiTestFileCommand,
-        genUITestingScript
+        genUITestingScript,
+        genUITestingScriptFolder
     );
 }
 
