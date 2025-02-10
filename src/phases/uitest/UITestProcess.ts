@@ -30,7 +30,7 @@ const generateResponse = initializeLLM();
 export async function genUITestScript(tool: string, language: string, source: string): Promise<string> {
     const prompt = `Generate a UI testing script for the given code snippets using the specified testing tool.
                     The script must:
-                    Detect and test all UI elements present in the provided code.
+                    Detect and fully test all UI elements present in the provided code. Write fully implemented test cases for each detected component and feature, do not leave placeholders or add comments suggesting more tests—write them.
                     Cover rendering, interactions, and behaviors relevant to the detected UI.
                     Handle different UI types (web, mobile, or Windows) based on the provided code.
                     Simulate user interactions (clicks, inputs, gestures, keyboard navigation, etc.).
@@ -38,10 +38,10 @@ export async function genUITestScript(tool: string, language: string, source: st
                     Manage asynchronous operations (e.g., animations, loading states, delayed UI updates).
                     Test edge cases and error handling (invalid inputs, missing fields, unexpected actions).
                     Detect if the UI interacts with APIs (fetching, submitting, or processing data).
-                    Mock API responses to test UI behavior under different conditions (success, failure, timeout).
+                    Make sure to mock API responses to test UI behavior under different conditions (success, failure, timeout).
                     Follow best practices for the selected testing tool and language.
                     Use modular and maintainable test functions to ensure reusability.
-                    Avoid using placeholders or incomplete comments. The output should be a fully executable test script, ready to run without modification.
+                    Insert comments or placeholders for required pre-processing steps (e.g., login, setup, navigation, data seeding) if needed.
 
                     Testing Tool: ${tool}
                     Script language: ${language}
