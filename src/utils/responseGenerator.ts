@@ -15,7 +15,7 @@ export async function getCodeReviewResponse(code: string): Promise<string> {
 }
 
 export async function getFrameworkList(language: string, code: string): Promise<string[]> {
-    const getFrameworkListPrompt = `Provide a list of top 5 popular testing frameworks in ${language} and most suitable for test this code: ${code}
+    const getFrameworkListPrompt = `Provide a list of top 5 popular testing frameworks(libraries) in ${language} and most suitable for test this code: ${code}
     . Format the response as a comma-separated list (a, b, c) without any explanations.`;
 
     return retryOn429(async () => {
