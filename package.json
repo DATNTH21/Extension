@@ -1,12 +1,15 @@
 {
-  "name": "WeTest Extension",
-  "version": "0.0.1",
+  "name": "WeTest",
+  "version": "0.0.2",
   "lockfileVersion": 3,
   "requires": true,
-  "description": "A VS Code extension to generate unit tests using the LLMs.",
-  "displayName": "Test Generator",
+  "description": "WeTest is a VS Code extension that uses Large Language Models (LLMs) to automatically generate testing code based on your source code. It helps developers streamline test creation by analyzing code structure and producing relevant test cases, reducing manual effort and improving code quality.",
+  "displayName": "WeTest Generator",
   "main": "./dist/extension.js",
   "packages": {},
+  "publisher": "WeTest",
+  "license": "CC-BY-NC-4.0",
+  "icon": "media/icon.png",
   "activationEvents": [
     "onStartupFinished",
     "onView:taskStatusView"
@@ -20,6 +23,16 @@
           "icon": "media/test-svgrepo-com.svg"
         }
       ]
+    },
+    "configuration": {
+      "title": "LLM Extension Settings",
+      "properties": {
+        "llmExtension.apis": {
+          "type": "object",
+          "default": {},
+          "description": "API keys for LLM services."
+        }
+      }
     },
     "views": {
       "activityBarContainer": [
@@ -89,7 +102,7 @@
     "vscode": "^1.1.37"
   },
   "engines": {
-    "vscode": "^1.70.0"
+    "vscode": "^1.95.0"
   },
   "scripts": {
     "compile": "tsc -p ./",
@@ -100,5 +113,10 @@
     "axios": "^1.7.7",
     "dotenv": "^16.4.5",
     "openai": "^4.67.3"
+  },
+  "repository": {
+  "type": "git",
+  "url": "https://github.com/your-username/we-test"
   }
+
 }
