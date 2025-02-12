@@ -63,6 +63,10 @@
         "title": "WeTest: Generate UI Script"
       },
       {
+        "command": "generateUITestingScriptFolder",
+        "title": "WeTest: Generate UI Test For Folder"
+      },
+      {
         "command": "configureApis",
         "title": "WeTest: Configure LLM APIs"
       }
