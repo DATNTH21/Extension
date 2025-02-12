@@ -34,7 +34,7 @@ export function highlightCodeFunc(editor: vscode.TextEditor, codeToHighlight: st
 
         // Apply new decorations
         activeDecorationType = vscode.window.createTextEditorDecorationType({
-            backgroundColor: 'rgba(174, 5, 225, 0.54)', // Yellow background for highlight
+            backgroundColor: 'rgba(5, 174, 225, 0.54)', // Yellow background for highlight
         });
 
         editor.setDecorations(activeDecorationType, decorations);

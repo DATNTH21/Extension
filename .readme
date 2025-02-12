@@ -6,7 +6,9 @@ Ctrl + Shift + P
 > WeTest: Generate Unit Test For Folder
 > WeTest: Generate Unit Test For File
 > WeTest: Generate Unit Test For Selected Code
-> WeTest: Reset API
+> WeTest: Generate API Test Code For File
+> WeTest: Generate Mocking API Test Code For File
+> WeTest: Generate UI Script
 
 ***
 > WeTest: Configure LLM APIs

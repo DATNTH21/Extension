@@ -27,6 +27,6 @@ export function getFolderTree(folderPath: string): any {
 }
 
 // Example usage
-const folderPath = '../utils';  // Replace with your folder path
-const folderTree = getFolderTree(folderPath);
-console.log(JSON.stringify(folderTree, null, 2));
+// const folderPath = '../utils';  // Replace with your folder path
+// const folderTree = getFolderTree(folderPath);
+// console.log(JSON.stringify(folderTree, null, 2));
