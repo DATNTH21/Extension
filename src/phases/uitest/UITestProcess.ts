@@ -30,22 +30,23 @@ const generateResponse = initializeLLM();
 export async function genUITestScript(tool: string, language: string, source: string): Promise<string> {
     const prompt = `Generate a UI testing script for the given code snippets using the specified testing tool.
                     The script must:
-                    Detect and fully test all UI elements present in the provided code. Write fully implemented test cases for each detected component and feature, do not leave placeholders or add comments suggesting more tests—write them.
+                    Detect and fully test all UI elements present in the provided code.
                     Cover rendering, interactions, and behaviors relevant to the detected UI.
                     Handle different UI types (web, mobile, or Windows) based on the provided code.
                     Simulate user interactions (clicks, inputs, gestures, keyboard navigation, etc.).
-                    Include assertions to verify expected UI behavior.
+                    Make sure to include assertions to verify expected UI behavior.
                     Manage asynchronous operations (e.g., animations, loading states, delayed UI updates).
                     Test edge cases and error handling (invalid inputs, missing fields, unexpected actions).
                     Detect if the UI interacts with APIs (fetching, submitting, or processing data).
                     Make sure to mock API responses to test UI behavior under different conditions (success, failure, timeout).
-                    Follow best practices for the selected testing tool and language.
-                    Use modular and maintainable test functions to ensure reusability.
-                    Insert comments or placeholders for required pre-processing steps (e.g., login, setup, navigation, data seeding) if needed.
+                    Make sure to include required pre-processing steps (e.g., login, setup, navigation, data seeding) if needed.
 
                     Testing Tool: ${tool}
                     Script language: ${language}
                     Code: ${source}
+                    Follow best practices for the selected testing tool and language.
+                    Use modular and maintainable test functions to ensure reusability.
+                    Write fully implemented test cases for each detected component and feature, try your best to avoid leaving placeholders or add comments suggesting.
                     Respond only with the file without any explanations.`;
 
     try {
