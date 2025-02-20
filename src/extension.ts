@@ -549,14 +549,13 @@ export function activate(context: vscode.ExtensionContext) {
             for (const filePath of allFilePaths) {
                 try {
                     const content = await fs.readFile(filePath, "utf8");
-                    const fileName = path.basename(filePath);
-                    code += `=== ${fileName} ===\n${content}\n\n`; // Append file name and content
+                    //const fileName = path.basename(filePath);
+                    code += `\n// FILE: ${filePath}\n${content}\n`;
                 } catch (error) {
                     vscode.window.showErrorMessage(`Error reading ${filePath}: ${String(error)}`);
                 }
             }
-            // const frameworks = await detectFramework(code);
-            // const selectedFramework = await showSelectionList(frameworks);
+
             const tools = await getRecommendTool(code);
             const selectedTool = await showSelectionList(tools);
 
