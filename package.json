@@ -73,11 +73,11 @@
       },
       {
         "command": "generateUITestingScript",
-        "title": "WeTest: Generate UI Script"
+        "title": "WeTest: Generate UI Test Script For Files"
       },
       {
         "command": "generateUITestingScriptFolder",
-        "title": "WeTest: Generate UI Test For Folder"
+        "title": "WeTest: Generate UI Test Script For Folder"
       },
       {
         "command": "configureApis",
@@ -115,8 +115,7 @@
     "openai": "^4.67.3"
   },
   "repository": {
-  "type": "git",
-  "url": "https://github.com/your-username/we-test"
+    "type": "git",
+    "url": "https://github.com/your-username/we-test"
   }
-
 }
