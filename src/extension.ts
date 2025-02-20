@@ -144,10 +144,10 @@ export function activate(context: vscode.ExtensionContext) {
 
     const configureApisCmd = vscode.commands.registerCommand('configureApis', async () => {
         const configuration = vscode.workspace.getConfiguration();
-    
+
         // Try to get the setting, ensuring we handle 'undefined' properly
         let existingApis = configuration.get<Record<string, string>>('llmExtension.apis', {});
-    
+
         if (!existingApis || Object.keys(existingApis).length === 0) {
             // Define default API settings
             const defaultApis = {
@@ -155,21 +155,21 @@ export function activate(context: vscode.ExtensionContext) {
                 "gpt": "your-api-key-here",
                 "gemini": "your-api-key-here"
             };
-    
+
             // Force the update of settings.json with new values
             await configuration.update('llmExtension.apis', defaultApis, vscode.ConfigurationTarget.Global, true);
-    
+
             vscode.window.showInformationMessage(
                 "Default API configuration added to settings.json. Edit it as needed."
             );
         } else {
             vscode.window.showInformationMessage("API settings already exist.");
         }
-    
+
         // Open settings.json to verify the update
         await vscode.commands.executeCommand('workbench.action.openSettingsJson');
     });
-    
+
 
 
     // Registering the command to generate unit tests for a file
@@ -560,14 +560,12 @@ export function activate(context: vscode.ExtensionContext) {
             const tools = await getRecommendTool(code);
             const selectedTool = await showSelectionList(tools);
 
-            const languages = await getUITestingScriptLanguage(String(selectedTool));
-            const selectedLanguage = await showSelectionList(languages);
+            const languages = JSON.parse(await getUITestingScriptLanguage(String(selectedTool)));
+            const selectedLanguage = await showSelectionList(languages.languages);
 
-            let unittests: string[] = []; // Use an array to collect unit tests
             try {
                 vscode.commands.executeCommand('myExtension.updateTaskStatus', taskName, 'In Progress');
                 const testingCodes = await genUITestScript(String(selectedTool), String(selectedLanguage), code);
-                //vscode.window.showInformationMessage(`${testingCodes}`)
                 vscode.commands.executeCommand('myExtension.updateTaskStatus', taskName, 'Completed');
                 if (!testingCodes) {
                     vscode.window.showErrorMessage('No testing scripts were generated.');
@@ -621,7 +619,7 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.window.showErrorMessage("No folder selected.");
             return;
         }
-        
+
         const folderPath = folderUri[0].fsPath;
         const folderName = path.basename(folderPath);
 
@@ -632,8 +630,6 @@ export function activate(context: vscode.ExtensionContext) {
 
             const files = JSON.parse(await detectUIRelatedFiles(foldertree.files));
 
-            //vscode.window.showInformationMessage(JSON.stringify(files.files));
-
             async function readFilesToString(fileList: string[]) {
                 let combinedContent = '';
 
@@ -641,7 +637,6 @@ export function activate(context: vscode.ExtensionContext) {
                     try {
                         const content = await fs.readFile(path.resolve(filePath), 'utf-8');
                         combinedContent += `\n// FILE: ${filePath}\n${content}\n`;
-                        //vscode.window.showInformationMessage(combinedContent);
                     } catch (error) {
                         vscode.window.showErrorMessage('Error reading file');
                         throw error;
@@ -652,21 +647,17 @@ export function activate(context: vscode.ExtensionContext) {
 
             const code = await readFilesToString(await files.files);
 
-            //vscode.window.showInformationMessage(code);
-
             const tools = await getRecommendTool(code);
             const selectedTool = await showSelectionList(tools);
 
-            const languages = await getUITestingScriptLanguage(String(selectedTool));
-            const selectedLanguage = await showSelectionList(languages);
+            const languages = JSON.parse(await getUITestingScriptLanguage(String(selectedTool)));
+            const selectedLanguage = await showSelectionList(languages.languages);
 
-            // let unittests: string[] = []; // Use an array to collect unit tests
             try {
                 vscode.commands.executeCommand('myExtension.updateTaskStatus', taskName, 'In Progress');
                 vscode.commands.executeCommand('myExtension.updateTaskStatus', taskName, 'Completed');
 
                 const testingCodes = await genUITestScript(String(selectedTool), String(selectedLanguage), code);
-                vscode.window.showInformationMessage(`${testingCodes}`)
                 if (!testingCodes) {
                     vscode.window.showErrorMessage('No testing scripts were generated.');
                     return;
