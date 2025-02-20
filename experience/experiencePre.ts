@@ -12,7 +12,7 @@ export async function getTestScope(source: string, apiKey: string): Promise<stri
     var input = prompt.replace('{sourcecode}', source);
     try{
         const result = await generateResponse(input, apiKey);
-        const filePathOut = path.join(__dirname, 'Output/preprocessing/TestScope.txt');
+        const filePathOut = path.join(__dirname, 'Output/unittest/preprocessing/TestScope.txt');
         await fs.writeFile(filePathOut, result, { encoding: 'utf8' });
         return result;
     }                                   
@@ -28,7 +28,7 @@ export async function getConstructors(source: string, apiKey: string): Promise<s
     var input = prompt.replace('{sourcecode}', source);
     try{
         const result = await generateResponse(input, apiKey);
-        const filePathOut = path.join(__dirname, 'Output/preprocessing/Constructors.txt');
+        const filePathOut = path.join(__dirname, 'Output/unittest/preprocessing/Constructors.txt');
         await fs.writeFile(filePathOut, result, { encoding: 'utf8' });
         return result;
     }                                   
@@ -44,7 +44,7 @@ export async function getAuxiliaryMethods(source: string, apiKey: string): Promi
     var input = prompt.replace('{sourcecode}', source);
     try{
         const result = await generateResponse(input, apiKey);
-        const filePathOut = path.join(__dirname, 'Output/preprocessing/AuxiliaryMethods.txt');
+        const filePathOut = path.join(__dirname, 'Output/unittest/preprocessing/AuxiliaryMethods.txt');
         await fs.writeFile(filePathOut, result, { encoding: 'utf8' });
         return result;
     }                                   
@@ -59,7 +59,7 @@ export async function getChainToPrivateMethods(source: string, apiKey: string): 
     var input = prompt.replace('{sourcecode}', source);
     try{
         const result = await generateResponse(input, apiKey);
-        const filePathOut = path.join(__dirname, 'Output/preprocessing/ChainToPrivateMethods.txt');
+        const filePathOut = path.join(__dirname, 'Output/unittest/preprocessing/ChainToPrivateMethods.txt');
         await fs.writeFile(filePathOut, result, { encoding: 'utf8' });
         return result;
     }                                   
@@ -75,7 +75,7 @@ export async function getMockingSetup(source: string, apiKey: string): Promise<s
     var input = prompt.replace('{sourcecode}', source);
     try{
         const result = await generateResponse(input, apiKey);
-        const filePathOut = path.join(__dirname, 'Output/preprocessing/MockingSetup.txt');
+        const filePathOut = path.join(__dirname, 'Output/unittest/preprocessing/MockingSetup.txt');
         await fs.writeFile(filePathOut, result, { encoding: 'utf8' });
         return result;
     }                                   
@@ -90,8 +90,8 @@ export async function getCodeStruct(source: string, apiKey: string): Promise<str
     const input = prompt + '\n' + source;
     try{
         const result = await generateResponse(input, apiKey);
-        const filePathOut = path.join(__dirname, 'Output/postprocessing/StructCode.txt');
-        await fs.writeFile(filePathOut, result, { encoding: 'utf8' });
+        // const filePathOut = path.join(__dirname, 'Output/postprocessing/StructCode.txt');
+        // await fs.writeFile(filePathOut, result, { encoding: 'utf8' });
         return result;
     }                                   
     catch (err) {

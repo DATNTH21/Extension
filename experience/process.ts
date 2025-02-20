@@ -7,46 +7,48 @@ import {getCodeStruct, getTestScope, getConstructors, getAuxiliaryMethods, getCh
 import {getTestStruct, getCoverageReport, checkUncovered} from './experiencePost';
 import { randomInt } from 'crypto';
 
-// export async function genUnittest(programminglanguage: string, framework: string, source: string, apiKey: string): Promise<string> {
-//     apiKey = 'AIzaSyDXmoUw6_s7FgJiSKKAPcDvJgaLJ1xMVrw'; // Assuming you're getting your API key from an environment variable
+export async function genUnittest(programminglanguage: string, framework: string, source: string, apiKey: string): Promise<string> {
+    apiKey = 'AIzaSyDXmoUw6_s7FgJiSKKAPcDvJgaLJ1xMVrw'; // Assuming you're getting your API key from an environment variable
     
-//     const getPromptFile = path.join(__dirname, 'prompts/process/genUnittest.txt');
-//     const prompt = fa.readFileSync(getPromptFile, 'utf8');
+    const getPromptFile = path.join(__dirname, 'prompts/process/genUnittest.txt');
+    const prompt = fa.readFileSync(getPromptFile, 'utf8');
 
-//     const fileCode = path.join(__dirname, 'Input/sourcecsharp.txt');
-//     source = fa.readFileSync(fileCode, 'utf8');
+    const fileCode = path.join(__dirname, 'Input/dijkstraA.py');
+    source = fa.readFileSync(fileCode, 'utf8');
+       
+   
     
-//     // PreProcessing:
-//     const testscope = await getTestScope(source, apiKey);
-//     const constructors = await getConstructors(source, apiKey);
-//     const auxiliarymethods = await getAuxiliaryMethods(source, apiKey);
-//     const chainedmethods = await getChainToPrivateMethods(source, apiKey);
-//     const mockingsetup = await getMockingSetup(source, apiKey);
-//     const sourcestructure = await getCodeStruct(source,apiKey);
+    // PreProcessing:
+    const testscope = await getTestScope(source, apiKey);
+    const constructors = await getConstructors(source, apiKey);
+    const auxiliarymethods = await getAuxiliaryMethods(source, apiKey);
+    const chainedmethods = await getChainToPrivateMethods(source, apiKey);
+    const mockingsetup = await getMockingSetup(source, apiKey);
+    const sourcestructure = await getCodeStruct(source,apiKey);
 
-//     const input = prompt.replace('{programminglanguage}', programminglanguage)
-//     .replace('{framework}', framework)
-//     .replace('{sourcecode}', source)
-//     .replace('{testscope}', testscope)
-//     .replace('{constructors}', constructors)
-//     .replace('{auxiliarymethods}', auxiliarymethods)
-//     .replace('{chainedmethods}', chainedmethods)
-//     .replace('{mockingsetup}', mockingsetup)
-//     .replace('{sourcestructure}', sourcestructure);
+    const input = prompt.replace('{programminglanguage}', programminglanguage)
+    .replace('{framework}', framework)
+    .replace('{sourcecode}', source)
+    .replace('{testscope}', testscope)
+    .replace('{constructors}', constructors)
+    .replace('{auxiliarymethods}', auxiliarymethods)
+    .replace('{chainedmethods}', chainedmethods)
+    .replace('{mockingsetup}', mockingsetup)
+    .replace('{sourcestructure}', sourcestructure);
 
-//     try{
-//         const unittest = await generateResponse(input, apiKey);
-//         const filePathOut = path.join(__dirname, 'Input/unittestcsharp.txt');
-//         await fs.writeFile(filePathOut, unittest, { encoding: 'utf8' });
-//         return unittest;
-//     }                                   
-//     catch (err) {
-//         console.error('Error reading file:', err);
-//         throw err;
-//     }
-// }            
+    try{
+        const unittest = await generateResponse(input, apiKey);
+        const filePathOut = path.join(__dirname, 'Input/pythongemini.py');
+        await fs.writeFile(filePathOut, unittest, { encoding: 'utf8' });
+        return unittest;
+    }                                   
+    catch (err) {
+        console.error('Error reading file:', err);
+        throw err;
+    }
+}            
 
-// // genUnittest('C#','NUnit' , '', '');
+genUnittest('Python','Pytest' , '', '');
 
 // export async function improveUnittest(programminglanguage: string, framework: string, source: string, test: string, apiKey: string): Promise<string> {
 //     apiKey = 'AIzaSyDXmoUw6_s7FgJiSKKAPcDvJgaLJ1xMVrw'; // Assuming you're getting your API key from an environment variable

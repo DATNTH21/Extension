@@ -11,7 +11,7 @@ import { processFiles } from '../../utils/processFiles';
 import { getTree } from '../../utils/getTree';
 
 const generateResponse = initializeLLM();
-export async function genApitest(project: string, programminglanguage: string, framework: string, apis: any): Promise<string> {
+export async function genApitest( programminglanguage: string, framework: string, apis: any): Promise<string> {
     const prompt = `Write test code that calls the all real APIs and validates the response based on the given details. Not mocking route or server.
 ## Input Parameters:
 - Programming Language: {programminglanguage}
