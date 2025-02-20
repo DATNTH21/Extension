@@ -1,14 +1,7 @@
 import * as path from 'path';
 import { promises as fs } from 'fs';
 import { initializeLLM } from '../../setting/extensionSetup';
-import { getAPIsDetails } from './getAPIsDetails';
-import { getTestCasesByMethod } from '../../utils/parseApiTestCases';
-import { createTestFile } from '../../utils/file_utils';
 import { extractCode } from '../../utils/extractCode';
-import { createTestFileS } from '../../utils/file_utils';
-import { defineRelativeFiles } from './defineRelativeFiles';
-import { processFiles } from '../../utils/processFiles';
-import { getTree } from '../../utils/getTree';
 
 const generateResponse = initializeLLM();
 export async function genApitest( programminglanguage: string, framework: string, apis: any): Promise<string> {
@@ -120,7 +113,6 @@ func TestAddBookRealAPI(t *testing.T) {
         .replace('{framework}', framework);
 
     try {
-        // const testcase = getTestCasesByMethod(api.method);
         // Replace placeholders in input for each API
         let apiInput = input.replace('apidetails', apis);
         // Generate the test case and append it to the result
