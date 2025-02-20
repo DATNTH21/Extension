@@ -17,7 +17,7 @@ import {
 } from './utils/responseGenerator';
 import { highlightCodeFunc, disableHighlight } from './utils/highlight';
 import { showSelectionList } from './utils/showselection';
-import { folderTree, getFolderTree } from './utils/getFolderTree';
+import { folderTree } from './utils/getFolderTree';
 
 import { getTree } from './utils/getTree';
 
@@ -28,8 +28,6 @@ import { defineRelativeFiles } from './processes/apitest/defineRelativeFiles';
 import { processFiles } from './utils/processFiles';
 import { genUITestScript } from './processes/uitest/UITestProcess';
 import { getAPIsDetails } from './processes/apitest/getAPIsDetails';
-import { getTestCasesByMethod } from './utils/parseApiTestCases';
-import { extractCode } from './utils/extractCode';
 import { genMockingApitest } from './processes/unittest/apiProcess';
 
 const configuration = vscode.workspace.getConfiguration();
