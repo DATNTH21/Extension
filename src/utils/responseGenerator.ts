@@ -99,11 +99,10 @@ export async function detectFramework(code: string): Promise<string[]> {
     });
 }
 
-export async function getUITestingScriptLanguage(tool: string): Promise<string[]> {
-    const recommendtool = `Identify the most popular programming languages used for writing UI Testing scripts in the UI Test Automation tool ${tool}, ordered from most popular to least popular. Format the response as a comma-separated list (e.g., "Python, Java, C#") without any explanations.`;
+export async function getUITestingScriptLanguage(tool: string): Promise<string> {
+    const prompt = `Identify the most popular programming languages used for writing UI Testing scripts in the UI Test Automation tool ${tool}, ordered from most popular to least popular.  Return a JSON-formatted output with a key named "languages" without any explanations. `;
     return retryOn429(async () => {
-        const response = await (await generateResponse)(recommendtool);
-        return response.split(',').map(fw => fw.trim());
+        return String(extractCode(await (await generateResponse)(prompt)));
     });
 }
 
@@ -111,7 +110,7 @@ export async function getUITestingScriptLanguage(tool: string): Promise<string[]
 export async function detectUIRelatedFiles(foldertree: string[]): Promise<string> {
     const prompt = `Given the following folder tree, identify all files relevant to UI functionality, including framework-specific components, dynamically generated UI, event handlers, and API-driven elements, that should be considered when generating a UI testing script. Ensure that files affecting web, mobile, or desktop UI are included as applicable.
                     Folder Tree: \n${foldertree.join('\n')}\n
-                    Return a JSON-formatted output with a key named "files" without any explanations`;
+                    Return a JSON-formatted output with a key named "files" without any explanations.`;
 
     return retryOn429(async () => {
         return String(extractCode(await (await generateResponse)(prompt)));
