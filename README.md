@@ -32,7 +32,6 @@ If you have a `.vsix` file:
 1. Clone the repository:
    ```sh
    git clone [repository link]
-   cd WeTest
    ```
 2. Install dependencies:
    ```sh
