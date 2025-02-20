@@ -1,8 +1,0 @@
-Source Code:
-{sourcecode}
-Test Code:
-{testcode}
-Test Coverage Report:
-{report}
-Assess accuracy Test Coverage Report (%), Is the report accurate, check if the uncovered part really hasn't been tested in the test code?
-(Output: percent of test coverage and the uncovered part really hasn't been tested)
