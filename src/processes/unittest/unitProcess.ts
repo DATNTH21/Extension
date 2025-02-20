@@ -8,7 +8,7 @@ import {
   getCodeStruct, getTestScope, getConstructors, getAuxiliaryMethods, 
   getChainToPrivateMethods, getMockingSetup
 } from './experiencePre';
-import { getTestStruct, getCoverageReport, checkUncovered } from './experiencePost';
+
 import { extractCode } from '../../utils/extractCode';
 import { initializeLLM } from '../../setting/extensionSetup';
 
@@ -91,38 +91,6 @@ export async function genUnittest(programminglanguage: string, framework: string
     }
 }
 
-export async function improveUnittest(programminglanguage: string, framework: string, source: string, test: string): Promise<string> {
-
-    const getPromptFile = path.join(__dirname, 'prompts/process/improveUnittest.txt');
-    const prompt = await fs.readFile(getPromptFile, 'utf8');
-
-    const fileTest = path.join(__dirname, 'Input/unittest.txt');
-    test = await fs.readFile(fileTest, 'utf8');
-    
-    const fileCode = path.join(__dirname, 'Input/source.txt');
-    source = await fs.readFile(fileCode, 'utf8');
-
-    // PostProcessing:
-    const coveragereport = await getCoverageReport(source, test);
-    const uncovered = await checkUncovered(source, test);
-    
-    const input = prompt.replace('{programminglanguage}', programminglanguage)
-        .replace('{framework}', framework)
-        .replace('{sourcecode}', source)
-        .replace('{unittest}', test)
-        .replace('{report}', coveragereport)
-        .replace('{improvereport}', uncovered);
-
-    try {
-        const unittest = await (await generateResponse)(input);
-        const filePathOut = path.join(__dirname, 'Input/improved_unittest.txt');
-        await fs.writeFile(filePathOut, unittest, { encoding: 'utf8' });
-        return unittest;
-    } catch (err) {
-        console.error('Error improving unit tests:', err);
-        throw err;
-    }
-}
 function extractBracketContent(data: string): string | null {
     let startIndex = data.indexOf('[');
     if (startIndex === -1) return null; // No opening bracket found
