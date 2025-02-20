@@ -31,7 +31,7 @@ If you have a `.vsix` file:
 ### 📌 Install from Source (Development Mode)
 1. Clone the repository:
    ```sh
-   git clone [repository link]
+   git clone [this repository link]
    ```
 2. Install dependencies:
    ```sh
