@@ -33,6 +33,7 @@ export async function genUnittest(programminglanguage: string, framework: string
         Ensure branch coverage for all conditional statements.
         Use the provided constructors and auxiliary methods in the test setup.
         Include tests for edge cases, invalid inputs, and typical use cases.
+        Each test case should be written as a separate function to ensure modularity and readability.
         Based on the source:
         In cases need to test random functions and values, choose the Distribution method to write tests for those cases.
         In cases need to verify fixed results, choose the Mock method to write tests for those cases.

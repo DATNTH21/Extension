@@ -12,7 +12,7 @@ export async function genMockingApitest(
 ): Promise<string> {
     try {
         // Load the prompt template
-        const promptTemplate = `Generate a unit test for all API endpoints in {LANGUAGE} using the testing framework: {framework}.
+        const promptTemplate = `Generate the unit test for all API endpoints in {LANGUAGE} using the testing framework: {framework}.
 The test should not call the real API but should use mocking to simulate API behavior. The test should:
 Create a mock request to the API endpoint.
 Use a mock server or a suitable mocking mechanism to handle the request.

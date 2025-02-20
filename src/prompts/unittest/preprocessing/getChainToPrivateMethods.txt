@@ -1,4 +1,4 @@
-For the public methods in the UserManager class, identify private methods or helper methods that are internally called as part of the implementation. 
+For the public methods in the classes, identify private methods or helper methods that are internally called as part of the implementation. 
 List these methods and their order of invocation, if applicable. 
 Return the result in JSON format.
 

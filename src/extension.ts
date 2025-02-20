@@ -21,16 +21,16 @@ import { folderTree, getFolderTree } from './utils/getFolderTree';
 
 import { getTree } from './utils/getTree';
 
-import { genUnittest, identifyMocking } from './phases/unittest/unitProcess'
-import { genApitest } from './phases/apitest/apiProcess01';
-import { defineApi } from './phases/apitest/defineApi';
-import { defineRelativeFiles } from './phases/apitest/defineRelativeFiles';
+import { genUnittest, identifyMocking } from './processes/unittest/unitProcess'
+import { genApitest } from './processes/apitest/apiProcess01';
+import { defineApi } from './processes/apitest/defineApi';
+import { defineRelativeFiles } from './processes/apitest/defineRelativeFiles';
 import { processFiles } from './utils/processFiles';
-import { genUITestScript } from './phases/uitest/UITestProcess';
-import { getAPIsDetails } from './phases/apitest/getAPIsDetails';
+import { genUITestScript } from './processes/uitest/UITestProcess';
+import { getAPIsDetails } from './processes/apitest/getAPIsDetails';
 import { getTestCasesByMethod } from './utils/parseApiTestCases';
 import { extractCode } from './utils/extractCode';
-import { genMockingApitest } from './phases/apitest/apiProcess';
+import { genMockingApitest } from './processes/unittest/apiProcess';
 
 const configuration = vscode.workspace.getConfiguration();
 const apis = configuration.get<Record<string, string>>('llmExtension.apis');
@@ -208,14 +208,12 @@ export function activate(context: vscode.ExtensionContext) {
             const selectedFramework = await showSelectionList(frameworks);
 
             // Create a new test file name
-            let unittests: string[] = []; // Use an array to collect unit tests
             try {
                 vscode.commands.executeCommand('myExtension.updateTaskStatus', taskName, 'In Progress');
 
                 const testingCodes = await genUnittest(String(selectedLanguage), String(selectedFramework), code);
 
                 if (testingCodes) {
-                    // unittests.push(testingCodes)
                     createTestFile(filePath, testingCodes);
                     vscode.commands.executeCommand('myExtension.updateTaskStatus', taskName, 'Completed');
 
@@ -413,10 +411,9 @@ export function activate(context: vscode.ExtensionContext) {
             const selectedFramework = await showSelectionList(frameworks);
 
             const apis = await getAPIsDetails(String(selectedLanguage), code);
-            const tree = getTree(folderPath);
             const extension = path.extname(filePath).slice(1);
             vscode.commands.executeCommand('myExtension.updateTaskStatus', taskName, 'In Progress');
-            const testingCodes = await genApitest(folderPath, String(selectedLanguage), String(selectedFramework), apis);
+            const testingCodes = await genApitest(String(selectedLanguage), String(selectedFramework), apis);
             const filename = path.basename(filePath, path.extname(filePath));
 
             createTestFileS(folderPath, filename + '_test.' + extension, testingCodes);
